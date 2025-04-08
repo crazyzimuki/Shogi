@@ -1,0 +1,1 @@
+C:\Users\3N1GMA\Desktop\Unity Games\MiniShogi\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\3s402j4m\obj\armeabi-v7a
