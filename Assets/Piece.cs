@@ -78,7 +78,7 @@ public class Piece : MonoBehaviour, IPointerClickHandler
 
     public virtual void UIPromotion()
     {
-        if (ShogiGame.Instance.simulating || data.boardRef == null || data.color == -1)
+        if (data.boardRef == null || data.color == -1)
         {
             Promote();
             return;

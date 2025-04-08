@@ -47,10 +47,7 @@ public class BoardDATA
             int targetColor = (target > 0) ? 1 : -1;
             if (targetColor != color)
             {
-                if (ShogiGame.Instance.simulating)
-                    SimulatedCapture(b, row, col);
-                else
-                    CapturePiece(b, target, row, col, color);
+                CapturePiece(b, target, row, col, color);
             }
             else
                 return;
@@ -60,33 +57,17 @@ public class BoardDATA
 
     public void MovePiece(BoardDATA b, PieceDATA p, int row, int col)
     {
-        if (ShogiGame.Instance.simulating)
-        {
-            int target = b.board[row, col];
-            if (target != 0)
-            {
-                int targetColor = (target > 0) ? 1 : -1;
-                if (targetColor == p.color)
-                {
-                    Debug.Log($"Simulation: Skipping move to friendly piece at ({row},{col})");
-                    return;
-                }
-            }
-        }
-
         int oldRow = p.row, oldCol = p.col;
         ModifyBoard(b, oldRow, oldCol, 0, 0);
         ModifyBoard(b, row, col, p.pieceType, p.color);
         p.row = row;
         p.col = col;
-        if (!ShogiGame.Instance.simulating)
-            Debug.Log($"MovePiece: Placed {p.pieceType * p.color} at ({row},{col})");
+        Debug.Log($"MovePiece: Placed {p.pieceType * p.color} at ({row},{col})");
     }
 
     public void CapturePiece(BoardDATA b, int pieceType, int row, int col, int color)
     {
-        // ... (keep the simulation check for safety, though ModifyBoard should handle it)
-        if (ShogiGame.Instance.simulating) { /* ... */ return; }
+        if (ShogiGame.Instance.simulating) { return; }
 
         Debug.Log($"Real capture: Piece Type {pieceType}, Color {-color} at ({row},{col})");
         PieceDATA targetPiece = PieceAt(b, row, col); // Use 'this', not 'b'? Check usage. Assuming 'this' is the relevant BoardDATA.
@@ -105,13 +86,6 @@ public class BoardDATA
             // Decide how to handle this - maybe just remove data?
             Pieces.Remove(targetPiece); // Remove from data list anyway?
                                         // Cannot create drop or destroy GameObject
-            return;
-        }
-
-        // Ensure boardRef is valid (should be for real captures)
-        if (boardRef == null)
-        {
-            Debug.LogError("CapturePiece: boardRef is null!");
             return;
         }
 

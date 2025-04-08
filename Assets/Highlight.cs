@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,37 +8,47 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     public Piece parentPiece;
     public bool isDrop;
 
+    /// <summary>
+    /// Handles clicks on highlights for moves or drops.
+    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (isDrop)
-            MakeDropMove();
-        else if ((parentPiece.data.color == 1 && boardRef.data.board[move.row, move.col] > 0) ||
-                 (parentPiece.data.color == -1 && boardRef.data.board[move.row, move.col] < 0))
         {
-            Debug.Log("Illegal move: cannot capture own piece.");
+            MakeDropMove();
             return;
         }
-        else if (parentPiece != null)
-        {
-            if (ShogiGame.Instance.color == parentPiece.data.color)
-                MakeMove();
-        }
-        else
+
+        if (parentPiece == null)
         {
             Debug.LogError("Highlight clicked with null parentPiece.");
             return;
         }
+
+        if (ShogiGame.Instance.color != parentPiece.data.color)
+        {
+            Debug.Log("Not your turn.");
+            return;
+        }
+
+        if ((parentPiece.data.color == 1 && boardRef.data.board[move.row, move.col] > 0) ||
+            (parentPiece.data.color == -1 && boardRef.data.board[move.row, move.col] < 0))
+        {
+            Debug.Log("Illegal move: cannot capture own piece.");
+            return;
+        }
+
+        MakeMove();
     }
 
+    /// <summary>
+    /// Checks if a move should be disabled (e.g., captures own piece or leaves king in check).
+    /// </summary>
     public bool DisableMove(int color)
     {
-        bool originalSim = ShogiGame.Instance.simulating;
-        ShogiGame.Instance.simulating = true;
-
         if ((color == 1 && boardRef.data.board[move.row, move.col] > 0) ||
             (color == -1 && boardRef.data.board[move.row, move.col] < 0))
         {
-            ShogiGame.Instance.simulating = originalSim;
             return true;
         }
 
@@ -48,56 +56,82 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         PieceDATA pCopy = simCopy.Pieces.Find(p => p.pieceId == parentPiece.data.pieceId);
         if (pCopy == null)
         {
-            ShogiGame.Instance.simulating = originalSim;
             return true;
         }
         simCopy.MovePiece(simCopy, pCopy, move.row, move.col);
-        bool inCheck = simCopy.isCheck(color, simCopy.Pieces);
-        ShogiGame.Instance.simulating = originalSim;
-        return inCheck;
+        return simCopy.isCheck(color, simCopy.Pieces);
     }
 
+    /// <summary>
+    /// Performs a regular piece move and updates the game state.
+    /// </summary>
     public void MakeMove()
     {
         boardRef.data.MovePiece(boardRef.data, parentPiece.data, move.row, move.col);
         parentPiece.MovePieceTransform();
         HighLightManager.ClearHighlights();
         parentPiece.data.CheckPromotion();
-        if (boardRef.data.IsCheckMate(boardRef, -parentPiece.data.color))
-            ShogiGame.EndLife(parentPiece.data.color);
-        else if (!Piece.isPromotionUIActive)
-            ShogiGame.EndTurn();
+        CheckForGameEnd(parentPiece.data.color);
     }
 
+    /// <summary>
+    /// Performs a drop move for the player and updates the game state.
+    /// </summary>
     public void MakeDropMove()
     {
         DroppedPiece dp = boardRef.LastPieceClicked.GetComponent<DroppedPiece>();
         boardRef.data.ModifyBoard(boardRef.data, move.row, move.col, dp.data.pieceType, dp.data.color);
         boardRef.SpawnPieceType(dp.data.pieceType, move.row, move.col);
-        boardRef.data.droppedPiecesData.Remove(dp.data);
+        boardRef.data.droppedPiecesData.Remove(dp.data); // Remove only once
         HighLightManager.ClearHighlights();
         Piece p = boardRef.PieceAt(move.row, move.col);
         Destroy(boardRef.LastPieceClicked.gameObject);
-        boardRef.data.droppedPiecesData.Remove(dp.data); // Remove from data list
-        if (boardRef.LastPieceClicked != null && p != null)
+        if (p != null)
             boardRef.LastPieceClicked = p.gameObject;
-        if (boardRef.data.IsCheckMate(boardRef, -p.data.color))
-            ShogiGame.EndLife(p.data.color == 1 ? 1 : -1);
-        else
-            ShogiGame.EndTurn();
+        CheckForGameEnd(dp.data.color);
     }
 
+    /// <summary>
+    /// Performs a drop move for the AI and updates the game state.
+    /// </summary>
     public void MakeAIDropMove(DroppedPieceDATA drop)
     {
         boardRef.data.ModifyBoard(boardRef.data, move.row, move.col, drop.pieceType, -1);
         boardRef.SpawnPieceType(drop.pieceType, move.row, move.col);
+        boardRef.data.droppedPiecesData.Remove(drop);
+        if (drop.parent != null)
+            Destroy(drop.parent.gameObject);
+        CheckForGameEnd(-1); // AI plays as black (-1)
+    }
 
-        boardRef.data.droppedPiecesData.Remove(drop); // Remove from data list
-        Destroy(drop.parent);
+    /// <summary>
+    /// Checks if the game ends due to checkmate or ends the turn otherwise.
+    /// ** MINIMAL FIX APPLIED HERE FOR CLARITY/ROBUSTNESS **
+    /// </summary>
+    private void CheckForGameEnd(int playerColor)
+    {
+        int opponentColor = -playerColor;
 
-        if (boardRef.data.IsCheckMate(boardRef, -drop.color))
-            ShogiGame.EndLife(drop.color == 1 ? 1 : -1);
+        // First, check for game end condition (checkmate)
+        if (boardRef.data.IsCheckMate(boardRef, opponentColor))
+        {
+            // If checkmate, end the game.
+            ShogiGame.EndLife(playerColor);
+        }
+        // If the game did NOT end with checkmate, THEN check the promotion flag
+        // to decide whether to end the turn now or defer it.
         else
-            ShogiGame.EndTurn();
+        {
+            // This is the crucial check: Only end the turn if the promotion UI
+            // flag is NOT set to true.
+            if (!Piece.isPromotionUIActive)
+            {
+                ShogiGame.EndTurn();
+            }
+            // Implicit else: If Piece.isPromotionUIActive IS true, do nothing here.
+            // The turn ending responsibility falls to the promotion UI handler code.
+            // (Adding a Debug.Log here can help trace the flow)
+            // else { Debug.Log("CheckForGameEnd: Turn end deferred due to active promotion UI."); }
+        }
     }
 }

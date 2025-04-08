@@ -70,6 +70,7 @@ public class DroppedPieceDATA
         newPiece.boardRef = null; // Clear live board reference for simulation
         newPiece.pieceRef = b.PieceAt(move.row, move.col);
         b.Pieces.Add(newPiece.pieceRef);
+
         // Remove this drop from droppedPiecesData
         DroppedPieceDATA toRemove = b.data.droppedPiecesData.Find(d => d.pieceType == pieceType && d.color == color);
         if (toRemove != null)
