@@ -182,8 +182,8 @@ public class ShogiGame : MonoBehaviour
 
     private static void ApplyRegularMove(string move)
     {
-        string from = move.Substring(0, 2); // e.g., "3a"
-        string to = move.Substring(2, 2);   // e.g., "2b"
+        string from = move.Substring(0, 2);
+        string to = move.Substring(2, 2);
         bool promote = move.Length > 4 && move[4] == '+';
 
         int fromCol = FileToCol(from[0]);
@@ -191,21 +191,37 @@ public class ShogiGame : MonoBehaviour
         int toCol = FileToCol(to[0]);
         int toRow = RankToRow(to[1]);
 
-        Piece piece = Instance.board.PieceAt(fromRow, fromCol);
-        if (piece == null)
+        // --- Step 1: Identify the correct PIECE DATA ---
+        // Use the reliable BoardDATA to find the data of the piece moving.
+        // Assumes BoardDATA is correctly updated by CapturePiece!
+        PieceDATA pieceDataToMove = Instance.board.data.PieceAt(Instance.board.data, fromRow, fromCol); // Use BoardDATA.PieceAt
+
+        if (pieceDataToMove == null)
         {
-            UnityEngine.Debug.LogError($"No piece at {from}");
+            UnityEngine.Debug.LogError($"ApplyRegularMove: No PieceDATA found at move origin ({fromRow},{fromCol}) for move '{move}'. Check BoardDATA state.");
             return;
         }
 
-        Highlight highlight = Instantiate(Instance.highPREFAB);
-        highlight.boardRef = Instance.board;
-        highlight.parentPiece = piece;
-        highlight.move.row = toRow;
-        highlight.move.col = toCol;
-        highlight.MakeMove();
-        // Note: Promotion not implemented in original; add piece.Promote() here if needed
-        Destroy(highlight.gameObject);
+        // --- Step 2: Find the corresponding LIVE GameObject/Piece Component ---
+        // Need a way to get the Piece component linked to the PieceDATA.
+        // Maybe Board has a dictionary or list mapping data to live objects?
+        // Example: Piece pieceToMove = Instance.board.FindPieceComponent(pieceDataToMove);
+        Piece pieceToMove = pieceDataToMove.pieceRef; // Assuming PieceDATA has a direct reference
+
+        if (pieceToMove == null || pieceToMove.gameObject == null)
+        {
+            UnityEngine.Debug.LogError($"ApplyRegularMove: Piece component for {pieceDataToMove.pieceType} at ({fromRow},{fromCol}) is null or destroyed! Move '{move}'. Check data/visual sync.");
+            return;
+        }
+
+        Instance.board.data.MovePiece(Instance.board.data, pieceDataToMove, toRow, toCol);
+        pieceToMove.MovePieceTransform();          // Perform the visual move
+
+        if (promote)
+        {
+            pieceToMove.Promote();
+        }
+        EndTurn();
     }
 
     private static void ApplyDropMove(string move)
