@@ -67,10 +67,11 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void MakeMove()
     {
+        int rowBeforeMove = parentPiece.data.row;
         boardRef.data.MovePiece(boardRef.data, parentPiece.data, move.row, move.col);
         parentPiece.MovePieceTransform();
         HighLightManager.ClearHighlights();
-        parentPiece.data.CheckPromotion();
+        parentPiece.data.CheckPromotion(rowBeforeMove);
         CheckForGameEnd(parentPiece.data.color);
     }
 

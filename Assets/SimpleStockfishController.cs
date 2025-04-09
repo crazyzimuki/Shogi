@@ -7,9 +7,6 @@ using System.IO;
 using System.Threading.Tasks;
 using TMPro;
 
-// Remember to set engineExecutableName in the Inspector!
-// Example: fairy-stockfish-largeboard_x86-64-modern.exe (or your specific build)
-
 public class SimpleStockfishController : MonoBehaviour
 {
     public bool IsEngineReadyForGame => isEngineInitialized && isEngineConfigured;
@@ -28,6 +25,7 @@ public class SimpleStockfishController : MonoBehaviour
     private StreamWriter engineWriter;
     private StreamReader engineReader;
     private string enginePath;
+    public int skillLevel = 0;
 
     // --- State ---
     private bool isEngineInitialized = false;
@@ -111,14 +109,13 @@ public class SimpleStockfishController : MonoBehaviour
         if (difficultyText != null)
         {
             difficultyText.text = $"{Mathf.RoundToInt(value)+1}";
+            skillLevel = (int)value;
         }
     }
 
     // Called when the "Start Game" button is pressed
     void OnStartGameButtonPressed()
     {
-        // Determine settings from UI
-        int skillLevel = 0;
         StartCoroutine(ConfigureEngineDifficulty(skillLevel));
 
         // Disable button after starting configuration to prevent spamming
@@ -243,11 +240,7 @@ public class SimpleStockfishController : MonoBehaviour
             UnityEngine.Debug.Log("Engine difficulty configured successfully and is ready.");
             needsUciNewGame = true; // Signal that the next move request should send ucinewgame
             UnityEngine.Debug.Log($"Engine difficulty configured (Skill Level {skillLevel}) and ready. Needs ucinewgame before next move.");
-            // --- TRIGGER GAME START HERE ---
-            // Example: Find your game manager and tell it the AI is ready
-            // ShogiGameManager.Instance?.StartAiGame();
-            // Or raise an event
-            // OnEngineConfiguredAndReady?.Invoke();
+
             startButton.interactable = true; // Re-enable button if you allow re-configuration
         }
         else
@@ -293,25 +286,43 @@ public class SimpleStockfishController : MonoBehaviour
     }
 
     // Coroutine to handle the 'position' and 'go' commands and wait for 'bestmove'
-    IEnumerator GetBestMoveCoroutine(string sfenPosition, Action<string> onMoveReceivedCallback) // Added parameter
+    IEnumerator GetBestMoveCoroutine(string sfenPosition, Action<string> onMoveReceivedCallback)
     {
-        UnityEngine.Debug.Log($"Requesting move for SFEN: position sfen {sfenPosition}");
+        UnityEngine.Debug.Log(">>> GetBestMoveCoroutine STARTING."); // Log Start
 
         // Ensure previous commands are processed before sending new position/go
+        UnityEngine.Debug.Log(">>> Checking 'isready' before sending position..."); // Log Before Check
         bool readyOkReceived = false;
         yield return SendCommandAndWaitForResponse("isready", "readyok", 3.0f, (success) => readyOkReceived = success);
+
+        UnityEngine.Debug.Log($">>> 'isready' check finished. Success: {readyOkReceived}"); // Log Result
+
         if (!readyOkReceived)
         {
-            UnityEngine.Debug.LogError("Engine not ready before sending position/go. Aborting move request.");
+            UnityEngine.Debug.LogError(">>> Engine NOT ready before sending position/go. Aborting move request. EXITING COROUTINE HERE."); // Log Failure Exit
             yield break;
         }
-        int movetime = 20;
+
+        // If the code reaches here, the 'isready' check passed.
+        UnityEngine.Debug.Log(">>> Engine IS ready. Proceeding to send position command..."); // Log Success Continuation
+
         SendCommand($"position sfen {sfenPosition}");
-        SendCommand("go movetime " + movetime);
+
+        UnityEngine.Debug.Log(">>> Position command sent. Proceeding to construct and send GO command..."); // Log Before Go
+
+        // --- CONSTRUCT AND LOG THE GO COMMAND ---
+        string goCommand;
+        // ... (Your chosen go command logic) ...
+        goCommand = $"go movetime " + (skillLevel+1)*5;
+        //goCommand = $"go depth {skillLevel + 1}"; 
+        UnityEngine.Debug.LogError($"<<<< INTENDED GO COMMAND: {goCommand} >>>>");
+
+        // --- SEND THE COMMAND ---
+        SendCommand(goCommand);
 
         string bestMove = null;
         float startTime = Time.realtimeSinceStartup;
-        float timeout = 2.0f; // Increased timeout for move calculation + buffer
+        float timeout = 15.0f; // Increased timeout for move calculation + buffer
         bool timedOut = false;
         bool engineExited = false;
         bool readError = false;
@@ -349,8 +360,8 @@ public class SimpleStockfishController : MonoBehaviour
 
             // Process the Line
             if (currentLine != null)
-            {
-                //UnityEngine.Debug.Log($"ENGINE RAW >> {currentLine}"); // Log everything
+            {          
+                UnityEngine.Debug.Log($"ENGINE RAW >> {currentLine}"); // Log everything
                 if (currentLine.StartsWith("bestmove"))
                 {
                     string[] parts = currentLine.Split(' ');
@@ -363,7 +374,6 @@ public class SimpleStockfishController : MonoBehaviour
                     }
                     else { UnityEngine.Debug.LogWarning($"Received malformed 'bestmove' line: {currentLine}"); }
                 }
-                // Ignore other lines (info, pv, etc.) while waiting for bestmove
             }
             else
             {
@@ -435,7 +445,6 @@ public class SimpleStockfishController : MonoBehaviour
     }
 
     // Sends a command and waits for a line starting with responsePrefix
-    // Uses the robust async read pattern
     IEnumerator SendCommandAndWaitForResponse(string command, string responsePrefix, float waitTimeout, Action<bool> successCallback)
     {
         SendCommand(command);

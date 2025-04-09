@@ -304,6 +304,7 @@ MonoBehaviour:
   eloSlider: {fileID: 292079344}
   difficultyText: {fileID: 1506346967}
   startButton: {fileID: 1640717998}
+  skillLevel: 0
 --- !u!1 &292079342
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,7 +321,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &292079343
 RectTransform:
   m_ObjectHideFlags: 0
@@ -939,7 +940,7 @@ RectTransform:
   m_Father: {fileID: 311249946}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1152,7 +1153,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &755031549
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1611,7 +1612,7 @@ RectTransform:
   m_Father: {fileID: 1473842656}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1913,7 +1914,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1506346966
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2061,12 +2062,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4409161bb50b34d4ea15114f817e159d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  simulating: 0
   highPREFAB: {fileID: 1872057366406256008, guid: 87b6dfcfcdff12b40999cf0a4c6c2f90, type: 3}
   GameOverText: {fileID: 298975618}
   board: {fileID: 892680248}
   color: 0
-  simulating: 0
   turn: 0
+  engine: {fileID: 207695098}
 --- !u!4 &1514445552
 Transform:
   m_ObjectHideFlags: 0

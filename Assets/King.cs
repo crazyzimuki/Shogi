@@ -10,7 +10,7 @@ public class King : PieceDATA
         return; // No UI bullshit since can't promote
     }
 
-    public override void CheckPromotion()
+    public override void CheckPromotion(int row)
     {
         return; // King can't promote
     }

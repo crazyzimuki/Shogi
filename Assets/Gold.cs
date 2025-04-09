@@ -9,7 +9,7 @@ public class Gold : PieceDATA
         return; // No UI bullshit since can't promote
     }
 
-    public override void CheckPromotion()
+    public override void CheckPromotion(int row)
     {
         return; // Gold can't promote
     }

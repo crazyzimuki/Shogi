@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using UnityEngine.UI;
+using System.Collections;
 
 public class ShogiGame : MonoBehaviour
 {
@@ -14,6 +16,7 @@ public class ShogiGame : MonoBehaviour
     public Board board;
     public int color;  // 1 = White (player), -1 = Black (Stockfish)
     public int turn;
+    public SimpleStockfishController engine;
 
     #region Initialization
     private void Awake()
@@ -35,7 +38,7 @@ public class ShogiGame : MonoBehaviour
     #endregion
 
     #region Turn Management
-    public static async void EndTurn()
+    public static  void EndTurn()
     {
         UnityEngine.Debug.Log($"EndTurn: Color={Instance.color}, Turn={Instance.turn}");
         HighLightManager.ClearHighlights();
@@ -53,110 +56,29 @@ public class ShogiGame : MonoBehaviour
         else
         {
             UnityEngine.Debug.Log("Stockfish's turn (Black)");
-            await StockfishMove();
+            UnityEngine.Debug.Log("SFEN: " + Instance.board.data.SFEN());
+            Instance.engine.RequestEngineMove(Instance.board.data.SFEN(), Instance.handleMoveReceived);
         }
     }
     #endregion
 
-    #region Stockfish Interaction
-    public static async Task StockfishMove()
+    Action<string> handleMoveReceived = (receivedMove) =>
     {
-        string stockfishPath = Path.Combine(Application.dataPath, "fairy-stockfish-largeboard_x86-64.exe");
-        if (!File.Exists(stockfishPath))
+        if (!string.IsNullOrEmpty(receivedMove))
         {
-            UnityEngine.Debug.LogError($"Stockfish not found at: {stockfishPath}");
-            return;
+            // Log that the move was received and apply it
+            UnityEngine.Debug.Log($"Stockfish move received: {receivedMove}. Applying...");
+            ApplyStockfishMove(receivedMove); // Assuming ApplyStockfishMove handles visuals and switches turn state
         }
-
-        using (var process = new Process())
+        else
         {
-            process.StartInfo.FileName = stockfishPath;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardInput = true;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-
-            try
-            {
-                process.Start();
-                process.BeginErrorReadLine();
-                process.ErrorDataReceived += (s, e) => { if (e.Data != null) UnityEngine.Debug.LogError($"Stockfish error: {e.Data}"); };
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogError($"Stockfish start failed: {e.Message}");
-                return;
-            }
-
-            // Initialize Stockfish
-            await process.StandardInput.WriteLineAsync("usi");
-            await process.StandardInput.FlushAsync();
-
-            // Wait for initialization confirmation
-            if (!await WaitForUsiOk(process))
-            {
-                UnityEngine.Debug.LogError("Stockfish initialization failed");
-                process.Kill();
-                return;
-            }
-
-            // Configure for Minishogi
-            await process.StandardInput.WriteLineAsync("setoption name UCI_Variant value minishogi");
-            await process.StandardInput.FlushAsync();
-
-            // Send current position
-            string sfen = Instance.board.data.SFEN();
-            await process.StandardInput.WriteLineAsync($"position sfen {sfen}");
-            await process.StandardInput.FlushAsync();
-
-            // Request move (5ms think time)
-            await process.StandardInput.WriteLineAsync("go movetime 5");
-            await process.StandardInput.FlushAsync();
-
-            // Get move
-            string move = await GetStockfishMove(process);
-            if (!string.IsNullOrEmpty(move))
-            {
-                ApplyStockfishMove(move);
-            }
-
-            process.Kill();
+            // Log an error if the move is null or empty
+            UnityEngine.Debug.LogError("AI failed to provide a valid move!");
+            // Decide how to handle this error (e.g., AI forfeits turn, game over?)
+            // You might need to manually switch back to the player's turn here if ApplyStockfishMove isn't called.
+            // Instance.SwitchToPlayerTurn(); // Example
         }
-    }
-
-    private static async Task<bool> WaitForUsiOk(Process process)
-    {
-        var timeout = Task.Delay(5000);
-        while (!process.HasExited)
-        {
-            var readTask = process.StandardOutput.ReadLineAsync();
-            if (await Task.WhenAny(readTask, timeout) == readTask)
-            {
-                string line = await readTask;
-                if (line?.Contains("usiok") == true) return true;
-            }
-            else
-            {
-                return false; // Timeout
-            }
-        }
-        return false;
-    }
-
-    private static async Task<string> GetStockfishMove(Process process)
-    {
-        while (!process.HasExited)
-        {
-            string line = await process.StandardOutput.ReadLineAsync();
-            if (line?.StartsWith("bestmove") == true)
-            {
-                return line.Split(' ')[1];
-            }
-        }
-        UnityEngine.Debug.LogError("No move received from Stockfish");
-        return null;
-    }
-    #endregion
+    };
 
     #region Move Application
     private static void ApplyStockfishMove(string move)
@@ -221,7 +143,7 @@ public class ShogiGame : MonoBehaviour
         {
             pieceToMove.Promote();
         }
-        EndTurn();
+        else EndTurn();
     }
 
     private static void ApplyDropMove(string move)

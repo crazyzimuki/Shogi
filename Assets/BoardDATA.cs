@@ -62,7 +62,7 @@ public class BoardDATA
         ModifyBoard(b, row, col, p.pieceType, p.color);
         p.row = row;
         p.col = col;
-        Debug.Log($"MovePiece: Placed {p.pieceType * p.color} at ({row},{col})");
+        //Debug.Log($"MovePiece: Placed {p.pieceType * p.color} at ({row},{col})");
     }
 
     public void CapturePiece(BoardDATA b, int pieceType, int row, int col, int color)
@@ -252,17 +252,17 @@ public class BoardDATA
                 switch (board[i, j])
                 {
                     case -7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'k'; break;
-                    case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'r'; if (PieceAt(this, i, j).promoted) s += '+'; break;
-                    case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'b'; if (PieceAt(this, i, j).promoted) s += '+'; break;
+                    case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'r'; break;
+                    case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'b'; break;
                     case -3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'g'; break;
-                    case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 's'; if (PieceAt(this, i, j).promoted) s += '+'; break;
-                    case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'p'; if (PieceAt(this, i, j).promoted) s += '+'; break;
+                    case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 's'; break;
+                    case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'p'; break;
                     case 7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'K'; break;
-                    case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'R'; if (PieceAt(this, i, j).promoted) s += '+'; break;
-                    case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'B'; if (PieceAt(this, i, j).promoted) s += '+'; break;
+                    case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'R'; break;
+                    case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'B'; break;
                     case 3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'G'; break;
-                    case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'S'; if (PieceAt(this, i, j).promoted) s += '+'; break;
-                    case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'P'; if (PieceAt(this, i, j).promoted) s += '+'; break;
+                    case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'S'; break;
+                    case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'P';  break;
                     case 0: emptyCounter++; lastEmpty = true; break;
                 }
             }

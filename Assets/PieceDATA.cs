@@ -31,14 +31,18 @@ public abstract class PieceDATA
 
     public abstract List<(int, int)> GetLegalMoves();
 
-    public virtual void CheckPromotion()
+    public virtual void CheckPromotion(int rowBeforeMove)
     {
         pieceRef.CheckPromotionRank();
         if (!promoted)
         {
+            // player moving into promotion rank
             if ((color == 1 && row == 0) || (color == -1 && row == 4))
                 pieceRef.UIPromotion();
-            if (isPromotionRank && ((color == 1 && row != 0) || (color == -1 && row != 4)))
+
+            // player moving out of promotion rank
+            // DOESNT WORK
+            if ((color == 1 && rowBeforeMove == 0 && row != 0) || (color == -1 && rowBeforeMove == 4 && row != 4))
                 pieceRef.UIPromotion();
         }
     }
