@@ -313,7 +313,7 @@ public class SimpleStockfishController : MonoBehaviour
         // --- CONSTRUCT AND LOG THE GO COMMAND ---
         string goCommand;
         // ... (Your chosen go command logic) ...
-        goCommand = $"go movetime " + (skillLevel+1)*5;
+        goCommand = $"go movetime " + (skillLevel+1);
         //goCommand = $"go depth {skillLevel + 1}"; 
         UnityEngine.Debug.LogError($"<<<< INTENDED GO COMMAND: {goCommand} >>>>");
 
