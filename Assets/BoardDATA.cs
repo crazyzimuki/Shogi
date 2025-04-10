@@ -82,7 +82,7 @@ public class BoardDATA
         // Check pieceRef BEFORE using it
         if (targetPiece.pieceRef == null)
         {
-            Debug.LogError($"CapturePiece: targetPiece {targetPiece.pieceType} at ({row},{col}) has null pieceRef!");
+            //Debug.LogError($"CapturePiece: targetPiece {targetPiece.pieceType} at ({row},{col}) has null pieceRef!");
             // Decide how to handle this - maybe just remove data?
             Pieces.Remove(targetPiece); // Remove from data list anyway?
                                         // Cannot create drop or destroy GameObject
@@ -190,6 +190,7 @@ public class BoardDATA
             return false;
         }
         List<PieceDATA> relevant = AllPiecesOfColor(color, Pieces);
+        List<DroppedPieceDATA> relevantDrops = AllDroppedPiecesDataOfColor(color);
         foreach (PieceDATA p in relevant)
         {
             List<(int r, int c)> moves = p.GetLegalMoves();
@@ -201,13 +202,41 @@ public class BoardDATA
                 simCopy.MovePiece(simCopy, pCopy, move.r, move.c);
                 if (!isCheck(color, simCopy.Pieces))
                 {
-                    //Debug.Log($"Escape found: {p.pieceType} to ({move.r},{move.c})");
+                    return false;
+                }
+            }
+        }
+
+        //// Problem: AI lets player make drops even when he's checkmated
+        // Look at all of the player's drop moves
+        foreach (DroppedPieceDATA dp in relevantDrops)
+        {
+            List<(int r, int c)> moves = dp.GenerateMoves();
+            foreach ((int row, int col) move in moves)
+            {
+                // Copy the board and pieces
+                Board simCopy = boardRef.CopyBoard();
+                Highlight high = new Highlight();
+                high.boardRef = simCopy;
+                high.move.row = move.row; high.move.col = move.col;
+                // Simulate the drop
+                high.MakeAIDropMove(simCopy, dp);
+                // Are we still in check after the drop?
+                if (!isCheck(color, simCopy.data.Pieces))
+                {
                     return false;
                 }
             }
         }
         Debug.Log("No escape found - Checkmate");
+        HighLightManager.ClearHighlights();
         return true;
+    }
+
+    public void SimulateAIDropMove(BoardDATA bb, DroppedPieceDATA drop, int row, int col)
+    {
+        bb.ModifyBoard(bb, row, col, drop.pieceType, -1);
+        boardRef.SpawnPieceType(drop.pieceType, row, col);
     }
 
     public bool isCheck(int color, List<PieceDATA> pieces)
@@ -405,7 +434,7 @@ public class BoardDATA
                 if (drop.data.pieceType == move.move.y) // FromCol has the pieceType
                 {
                     Debug.Log("Dropped piece found!");
-                    AImove.MakeAIDropMove(drop.data);
+                    AImove.MakeAIDropMove(boardRef, drop.data);
                 }
             }
         }

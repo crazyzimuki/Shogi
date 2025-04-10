@@ -48,6 +48,7 @@ public class Board : MonoBehaviour
 
     public void SpawnPiece(int row, int col, GameObject piecePrefab)
     {
+        if (this == null) { ShogiGame.EndLife(-1); return; }
         GameObject instance = Instantiate(piecePrefab, HighLightManager.Grid.GetWorldPosition(col, row), Quaternion.identity, transform);
         Piece comp = instance.GetComponent<Piece>();
 
@@ -155,8 +156,13 @@ public class Board : MonoBehaviour
     {
         Board copy = new Board();
         copy.data = data.Clone();
+        copy.data.boardRef = copy;
+        copy.King = King;
+        copy.Rook = Rook;
+        copy.Bishop = Bishop;
+        copy.Gold = Gold;
+        copy.Silver = Silver;
+        copy.Pawn = Pawn;
         return copy;
     }
 }
-
-//ENABLE PLAYER PROMOTION WHEN MOVING OUT OF THE PROMOTION RANK // THIS FEATURE IS MISSING *ANGRYFACE*

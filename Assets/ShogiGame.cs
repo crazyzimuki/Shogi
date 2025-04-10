@@ -10,6 +10,7 @@ using System.Collections;
 public class ShogiGame : MonoBehaviour
 {
     public bool simulating = false;
+    public bool gameOver = false;
     public Highlight highPREFAB;  // Prefab for move highlights
     public TMP_Text GameOverText;
     public static ShogiGame Instance { get; private set; }
@@ -43,7 +44,7 @@ public class ShogiGame : MonoBehaviour
         UnityEngine.Debug.Log($"EndTurn: Color={Instance.color}, Turn={Instance.turn}");
         HighLightManager.ClearHighlights();
 
-        if (Instance.color == 0) return; // Game is over
+        if (Instance.color == 0 || Instance.gameOver) return; // Game is over
 
         Instance.color *= -1; // Switch player
         Instance.turn++;
@@ -182,7 +183,7 @@ public class ShogiGame : MonoBehaviour
         highlight.boardRef = Instance.board;
         highlight.move.row = rowTarget;
         highlight.move.col = colTarget;
-        highlight.MakeAIDropMove(dropToUse);
+        highlight.MakeAIDropMove(Instance.board, dropToUse);
         Instance.board.data.droppedPiecesData.Remove(dropToUse);
         Destroy(highlight.gameObject);
     }
@@ -209,6 +210,8 @@ public class ShogiGame : MonoBehaviour
         UnityEngine.Debug.Log($"Checkmate! {winner} wins");
         Instance.GameOverText.text = $"Checkmate - {winner} Wins!";
         Instance.color = 0; // Halt game
+        ActivatePieces(0);
+        Instance.gameOver = true;
     }
 
     public static void ActivatePieces(int activeColor)

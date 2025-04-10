@@ -46,9 +46,11 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public bool DisableMove(int color)
     {
+        //ShogiGame.Instance.simulating = true;
         if ((color == 1 && boardRef.data.board[move.row, move.col] > 0) ||
             (color == -1 && boardRef.data.board[move.row, move.col] < 0))
         {
+            //ShogiGame.Instance.simulating = false;
             return true;
         }
 
@@ -56,9 +58,11 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         PieceDATA pCopy = simCopy.Pieces.Find(p => p.pieceId == parentPiece.data.pieceId);
         if (pCopy == null)
         {
+            //ShogiGame.Instance.simulating = false;
             return true;
         }
         simCopy.MovePiece(simCopy, pCopy, move.row, move.col);
+        //ShogiGame.Instance.simulating = false;
         return simCopy.isCheck(color, simCopy.Pieces);
     }
 
@@ -95,7 +99,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     /// <summary>
     /// Performs a drop move for the AI and updates the game state.
     /// </summary>
-    public void MakeAIDropMove(DroppedPieceDATA drop)
+    public void MakeAIDropMove(Board boardRef, DroppedPieceDATA drop)
     {
         boardRef.data.ModifyBoard(boardRef.data, move.row, move.col, drop.pieceType, -1);
         boardRef.SpawnPieceType(drop.pieceType, move.row, move.col);
