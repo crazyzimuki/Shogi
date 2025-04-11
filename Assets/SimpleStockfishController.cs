@@ -278,7 +278,7 @@ public class SimpleStockfishController : MonoBehaviour
         {
             if (needsUciNewGame) // Rename this flag maybe? needsUsiNewGame?
             {
-                UnityEngine.Debug.Log("Sending 'usinewgame' before setting position...");
+                //UnityEngine.Debug.Log("Sending 'usinewgame' before setting position...");
                 SendCommand("usinewgame"); // Use USI command
                 needsUciNewGame = false; // Reset the flag
             }
@@ -288,14 +288,14 @@ public class SimpleStockfishController : MonoBehaviour
     // Coroutine to handle the 'position' and 'go' commands and wait for 'bestmove'
     IEnumerator GetBestMoveCoroutine(string sfenPosition, Action<string> onMoveReceivedCallback)
     {
-        UnityEngine.Debug.Log(">>> GetBestMoveCoroutine STARTING."); // Log Start
+        //UnityEngine.Debug.Log(">>> GetBestMoveCoroutine STARTING."); // Log Start
 
         // Ensure previous commands are processed before sending new position/go
-        UnityEngine.Debug.Log(">>> Checking 'isready' before sending position..."); // Log Before Check
+        //UnityEngine.Debug.Log(">>> Checking 'isready' before sending position..."); // Log Before Check
         bool readyOkReceived = false;
         yield return SendCommandAndWaitForResponse("isready", "readyok", 3.0f, (success) => readyOkReceived = success);
 
-        UnityEngine.Debug.Log($">>> 'isready' check finished. Success: {readyOkReceived}"); // Log Result
+        //UnityEngine.Debug.Log($">>> 'isready' check finished. Success: {readyOkReceived}"); // Log Result
 
         if (!readyOkReceived)
         {
@@ -304,18 +304,18 @@ public class SimpleStockfishController : MonoBehaviour
         }
 
         // If the code reaches here, the 'isready' check passed.
-        UnityEngine.Debug.Log(">>> Engine IS ready. Proceeding to send position command..."); // Log Success Continuation
+        //UnityEngine.Debug.Log(">>> Engine IS ready. Proceeding to send position command..."); // Log Success Continuation
 
         SendCommand($"position sfen {sfenPosition}");
 
-        UnityEngine.Debug.Log(">>> Position command sent. Proceeding to construct and send GO command..."); // Log Before Go
+        //UnityEngine.Debug.Log(">>> Position command sent. Proceeding to construct and send GO command..."); // Log Before Go
 
         // --- CONSTRUCT AND LOG THE GO COMMAND ---
         string goCommand;
         // ... (Your chosen go command logic) ...
         goCommand = $"go movetime " + (skillLevel+1);
         //goCommand = $"go depth {skillLevel + 1}"; 
-        UnityEngine.Debug.LogError($"<<<< INTENDED GO COMMAND: {goCommand} >>>>");
+        //UnityEngine.Debug.LogError($"<<<< INTENDED GO COMMAND: {goCommand} >>>>");
 
         // --- SEND THE COMMAND ---
         SendCommand(goCommand);
@@ -361,14 +361,14 @@ public class SimpleStockfishController : MonoBehaviour
             // Process the Line
             if (currentLine != null)
             {          
-                UnityEngine.Debug.Log($"ENGINE RAW >> {currentLine}"); // Log everything
+                //UnityEngine.Debug.Log($"ENGINE RAW >> {currentLine}"); // Log everything
                 if (currentLine.StartsWith("bestmove"))
                 {
                     string[] parts = currentLine.Split(' ');
                     if (parts.Length >= 2)
                     {
                         bestMove = parts[1];
-                        UnityEngine.Debug.Log($"Best move received: {bestMove}");
+                        //UnityEngine.Debug.Log($"Best move received: {bestMove}");
                         loopFinishedNaturally = true; // Found move, exit loop cleanly
                         onMoveReceivedCallback?.Invoke(bestMove);
                     }

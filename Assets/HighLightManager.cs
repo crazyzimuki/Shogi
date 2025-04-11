@@ -47,6 +47,8 @@ public class HighLightManager : MonoBehaviour
                 Instance.activeHighlights.Add(highlight);
 
                 if (!isDrop)
+                {
+                    ShogiGame.Instance.simulating = true;
                     if (highlightSCRIPT.DisableMove(ShogiGame.Instance.color)) // If move is illegal
                     {
                         Debug.Log($"Highlight for move: {highlightSCRIPT.move.row}, {highlightSCRIPT.move.col} Removed");
@@ -54,6 +56,8 @@ public class HighLightManager : MonoBehaviour
                         Destroy(highlight.gameObject);
                         continue;
                     }
+                    ShogiGame.Instance.simulating = false;
+                }
             }
     }
 

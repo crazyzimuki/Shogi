@@ -15,7 +15,6 @@ public class BoardDATA
         {  7,  3,  2,  4,  5 }
     };
 
-    public List<DroppedPiece> DroppedPieces = new List<DroppedPiece>();
     public List<PieceDATA> Pieces = new List<PieceDATA>();
     public List<DroppedPieceDATA> droppedPiecesData = new List<DroppedPieceDATA>();
     public BoardDATA()
@@ -47,6 +46,9 @@ public class BoardDATA
             int targetColor = (target > 0) ? 1 : -1;
             if (targetColor != color)
             {
+                if (ShogiGame.Instance.simulating)
+                    SimulatedCapture(row, col);
+                else
                 CapturePiece(target, row, col, color);
             }
             else
@@ -67,8 +69,6 @@ public class BoardDATA
 
     public void CapturePiece(int pieceType, int row, int col, int color)
     {
-        if (ShogiGame.Instance.simulating) { return; }
-
         Debug.Log($"Real capture: Piece Type {pieceType}, Color {-color} at ({row},{col})");
         PieceDATA targetPiece = PieceAt(row, col); 
         if (targetPiece == null)
@@ -83,15 +83,13 @@ public class BoardDATA
         if (targetPiece.pieceRef == null)
         {
             //Debug.LogError($"CapturePiece: targetPiece {targetPiece.pieceType} at ({row},{col}) has null pieceRef!");
-            // Decide how to handle this - maybe just remove data?
-            Pieces.Remove(targetPiece); // Remove from data list anyway?
-                                        // Cannot create drop or destroy GameObject
+            Pieces.Remove(targetPiece); // Remove from data list anyway
             return;
         }
 
-        boardRef.CreateNewDrop(targetPiece.pieceRef); // Now potentially safer
+        boardRef.CreateNewDrop(targetPiece.pieceRef); 
         Pieces.Remove(targetPiece);
-        Board.DestroyPiece(targetPiece.pieceRef.gameObject); // Now potentially safer
+        Board.DestroyPiece(targetPiece.pieceRef.gameObject); 
     }
 
     public void SimulatedCapture(int row, int col)
@@ -124,11 +122,6 @@ public class BoardDATA
         return pieces.FindAll(p => p.color == color);
     }
 
-    public List<DroppedPiece> AllDroppedPiecesOfColor(int color)
-    {
-        return DroppedPieces.FindAll(d => d.data.color == color);
-    }
-
     public List<DroppedPieceDATA> AllDroppedPiecesDataOfColor(int color)
     {
         return droppedPiecesData.FindAll(d => d.color == color);
@@ -159,7 +152,7 @@ public class BoardDATA
             copy.Pieces.Add(pCopy);
         }
         copy.droppedPiecesData = new List<DroppedPieceDATA>();
-        foreach (DroppedPieceDATA dp in this.droppedPiecesData)
+        foreach (DroppedPieceDATA dp in droppedPiecesData)
         {
             DroppedPieceDATA dpCopy = new DroppedPieceDATA { pieceType = dp.pieceType, color = dp.color, promoted = dp.promoted };
             dpCopy.boardRef = null; // No live board in simulation
@@ -206,7 +199,6 @@ public class BoardDATA
             }
         }
 
-        //// Problem: AI lets player make drops even when he's checkmated
         // Look at all of the player's drop moves
         foreach (DroppedPieceDATA dp in relevantDrops)
         {
@@ -432,12 +424,12 @@ public class BoardDATA
         // Drop
         if (move.move.x == -1) // If move.FromRow == -1
         {
-            foreach (DroppedPiece drop in AllDroppedPiecesOfColor(-1))
+            foreach (DroppedPieceDATA drop in AllDroppedPiecesDataOfColor(-1))
             {
-                if (drop.data.pieceType == move.move.y) // FromCol has the pieceType
+                if (drop.pieceType == move.move.y) // FromCol has the pieceType
                 {
                     Debug.Log("Dropped piece found!");
-                    AImove.MakeAIDropMove(drop.data);
+                    AImove.MakeAIDropMove(drop);
                 }
             }
         }

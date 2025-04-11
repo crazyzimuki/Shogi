@@ -46,11 +46,9 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public bool DisableMove(int color)
     {
-        //ShogiGame.Instance.simulating = true;
         if ((color == 1 && boardRef.data.board[move.row, move.col] > 0) ||
             (color == -1 && boardRef.data.board[move.row, move.col] < 0))
         {
-            //ShogiGame.Instance.simulating = false;
             return true;
         }
 
@@ -58,11 +56,9 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         PieceDATA pCopy = simCopy.Pieces.Find(p => p.pieceId == parentPiece.data.pieceId);
         if (pCopy == null)
         {
-            //ShogiGame.Instance.simulating = false;
             return true;
         }
         simCopy.MovePiece(pCopy, move.row, move.col);
-        //ShogiGame.Instance.simulating = false;
         return simCopy.isCheck(color, simCopy.Pieces);
     }
 

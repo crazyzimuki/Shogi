@@ -8,7 +8,7 @@ public class Board : MonoBehaviour
     public List<Piece> Pieces = new List<Piece>();
     public GameObject LastPieceClicked;
 
-    public GameObject DropsUI;       // (Assume implemented)
+    public GameObject DropsUI;
     public GameObject DroppablePiece; // Prefab for drops
 
     public GameObject King;
@@ -32,9 +32,9 @@ public class Board : MonoBehaviour
             case 7: return SpawnPiece(row, col, King);
             case 5: return SpawnPiece(row, col, Rook);
             case 4: return SpawnPiece(row, col, Bishop);
-            case 3: return SpawnPiece(row, col, Gold); 
-            case 2: return SpawnPiece(row, col, Silver); 
-            case 1: return SpawnPiece(row, col, Pawn); 
+            case 3: return SpawnPiece(row, col, Gold);
+            case 2: return SpawnPiece(row, col, Silver);
+            case 1: return SpawnPiece(row, col, Pawn);
             default: return null;
         }
     }
@@ -91,13 +91,38 @@ public class Board : MonoBehaviour
         drop.data = dropData;
         drop.Init(this, dropData.pieceType, dropData.color, pieceDATA.pieceRef.DefaultSPR, false);
 
-        // Position based on existing drops of this color
-        int positionIndex = data.AllDroppedPiecesDataOfColor(dropData.color).Count - 1; // -1 because we just added it
-        drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
-        drop.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
-        SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
-        rend.flipY = (dropData.color < 0); // Flip if black
-        drop.ResetCollider();
+        // Remove null entries
+        foreach (DroppedPieceDATA obj in data.droppedPiecesData)
+        {
+            if (obj == null)
+                data.droppedPiecesData.Remove(obj);
+        }
+
+        ReorganizeDrops(drop);
+    }
+
+    public void ReorganizeDrops(DroppedPiece drop)
+    {
+        int positionIndex = 0;
+        foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(ShogiGame.Instance.color))
+        {
+            drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
+            drop.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
+            rend.flipY = (dpr.color < 0); // Flip if black
+            drop.ResetCollider();
+            positionIndex++;
+        }
+        positionIndex = 0;
+        foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(-ShogiGame.Instance.color))
+        {
+            drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
+            drop.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
+            rend.flipY = (dpr.color < 0); // Flip if black
+            drop.ResetCollider();
+            positionIndex++;
+        }
     }
 
     public void CreateNewDrop(Piece pieceToCapture)
