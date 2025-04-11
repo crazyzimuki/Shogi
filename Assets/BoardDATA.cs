@@ -34,43 +34,43 @@ public class BoardDATA
                 board[r, c] = initialBoardSetup[r, c];
     }
 
-    public PieceDATA PieceAt(BoardDATA b, int row, int col)
+    public PieceDATA PieceAt(int row, int col)
     {
-        return b.Pieces.FirstOrDefault(p => p.row == row && p.col == col);
+        return Pieces.FirstOrDefault(p => p.row == row && p.col == col);
     }
 
-    public void ModifyBoard(BoardDATA b, int row, int col, int pieceType, int color)
+    public void ModifyBoard(int row, int col, int pieceType, int color)
     {
-        int target = b.board[row, col];
+        int target = board[row, col];
         if (pieceType != 0 && target != 0)
         {
             int targetColor = (target > 0) ? 1 : -1;
             if (targetColor != color)
             {
-                CapturePiece(b, target, row, col, color);
+                CapturePiece(target, row, col, color);
             }
             else
                 return;
         }
-        b.board[row, col] = pieceType * color;
+        board[row, col] = pieceType * color;
     }
 
-    public void MovePiece(BoardDATA b, PieceDATA p, int row, int col)
+    public void MovePiece(PieceDATA p, int row, int col)
     {
         int oldRow = p.row, oldCol = p.col;
-        ModifyBoard(b, oldRow, oldCol, 0, 0);
-        ModifyBoard(b, row, col, p.pieceType, p.color);
+        ModifyBoard(oldRow, oldCol, 0, 0);
+        ModifyBoard(row, col, p.pieceType, p.color);
         p.row = row;
         p.col = col;
         //Debug.Log($"MovePiece: Placed {p.pieceType * p.color} at ({row},{col})");
     }
 
-    public void CapturePiece(BoardDATA b, int pieceType, int row, int col, int color)
+    public void CapturePiece(int pieceType, int row, int col, int color)
     {
         if (ShogiGame.Instance.simulating) { return; }
 
         Debug.Log($"Real capture: Piece Type {pieceType}, Color {-color} at ({row},{col})");
-        PieceDATA targetPiece = PieceAt(b, row, col); // Use 'this', not 'b'? Check usage. Assuming 'this' is the relevant BoardDATA.
+        PieceDATA targetPiece = PieceAt(row, col); 
         if (targetPiece == null)
         {
             Debug.LogError($"CapturePiece: No PieceDATA found at ({row},{col}) to capture.");
@@ -94,18 +94,18 @@ public class BoardDATA
         Board.DestroyPiece(targetPiece.pieceRef.gameObject); // Now potentially safer
     }
 
-    public void SimulatedCapture(BoardDATA b, int row, int col)
+    public void SimulatedCapture(int row, int col)
     {
-        PieceDATA targetPiece = PieceAt(b, row, col);
+        PieceDATA targetPiece = PieceAt(row, col);
         if (targetPiece != null)
         {
             targetPiece.simulatedCapture = true;
-            b.Pieces.Remove(targetPiece);
+            Pieces.Remove(targetPiece);
             // Add to opponent's dropped pieces
             DroppedPieceDATA newDrop = new DroppedPieceDATA { pieceType = targetPiece.pieceType, color = -targetPiece.color, promoted = false };
-            b.droppedPiecesData.Add(newDrop);
+            droppedPiecesData.Add(newDrop);
         }
-        b.board[row, col] = 0;
+        board[row, col] = 0;
     }
 
     public List<(int, int)> AllLegalMoves(int color)
@@ -182,24 +182,19 @@ public class BoardDATA
     public bool IsCheckMate(Board B, int color)
     {
         //Debug.Log($"Checking checkmate for color {color}, Pieces count: {Pieces.Count}");
-        foreach (PieceDATA p in Pieces)
-            //Debug.Log($"Piece: {p.pieceType} at ({p.row},{p.col}), color {p.color}");
-        if (!isCheck(color, Pieces))
-        {
-            //Debug.Log("King not in check");
-            return false;
-        }
+        //Debug.Log($"Piece: {p.pieceType} at ({p.row},{p.col}), color {p.color}");
+
         List<PieceDATA> relevant = AllPiecesOfColor(color, Pieces);
-        List<DroppedPieceDATA> relevantDrops = AllDroppedPiecesDataOfColor(color);
+        List<DroppedPieceDATA> relevantDrops = AllDroppedPiecesDataOfColor(-color);
         foreach (PieceDATA p in relevant)
         {
             List<(int r, int c)> moves = p.GetLegalMoves();
             foreach (var move in moves)
             {
                 BoardDATA simCopy = Clone();
-                PieceDATA pCopy = simCopy.PieceAt(simCopy, p.row, p.col);
+                PieceDATA pCopy = simCopy.PieceAt(p.row, p.col);
                 if (pCopy == null) continue;
-                simCopy.MovePiece(simCopy, pCopy, move.r, move.c);
+                simCopy.MovePiece(pCopy, move.r, move.c);
                 if (!isCheck(color, simCopy.Pieces))
                 {
                     return false;
@@ -220,7 +215,7 @@ public class BoardDATA
                 high.boardRef = simCopy;
                 high.move.row = move.row; high.move.col = move.col;
                 // Simulate the drop
-                high.MakeAIDropMove(simCopy, dp);
+                SimulateAIDropMove(simCopy.data, dp, move.row, move.col);
                 // Are we still in check after the drop?
                 if (!isCheck(color, simCopy.data.Pieces))
                 {
@@ -235,8 +230,11 @@ public class BoardDATA
 
     public void SimulateAIDropMove(BoardDATA bb, DroppedPieceDATA drop, int row, int col)
     {
-        bb.ModifyBoard(bb, row, col, drop.pieceType, -1);
-        boardRef.SpawnPieceType(drop.pieceType, row, col);
+        bb.ModifyBoard(row, col, drop.pieceType, drop.color);
+        //bb.boardRef.SpawnPieceType(drop.pieceType, row, col);
+        PieceDATA newPiece = bb.boardRef.CreatePieceDataByType(drop.pieceType);
+        newPiece.row = row; newPiece.col = col; newPiece.color = drop.color; newPiece.boardRef = bb.boardRef; newPiece.pieceType = drop.pieceType;
+        Pieces.Add(newPiece);
     }
 
     public bool isCheck(int color, List<PieceDATA> pieces)
@@ -281,17 +279,17 @@ public class BoardDATA
                 switch (board[i, j])
                 {
                     case -7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'k'; break;
-                    case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'r'; break;
-                    case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'b'; break;
+                    case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'r'; break;
+                    case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'b'; break;
                     case -3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'g'; break;
-                    case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 's'; break;
-                    case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'p'; break;
+                    case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 's'; break;
+                    case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'p'; break;
                     case 7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'K'; break;
-                    case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'R'; break;
-                    case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'B'; break;
+                    case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'R'; break;
+                    case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'B'; break;
                     case 3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'G'; break;
-                    case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'S'; break;
-                    case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(this, i, j).promoted) s += '+'; s += 'P';  break;
+                    case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'S'; break;
+                    case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'P';  break;
                     case 0: emptyCounter++; lastEmpty = true; break;
                 }
             }
@@ -434,7 +432,7 @@ public class BoardDATA
                 if (drop.data.pieceType == move.move.y) // FromCol has the pieceType
                 {
                     Debug.Log("Dropped piece found!");
-                    AImove.MakeAIDropMove(boardRef, drop.data);
+                    AImove.MakeAIDropMove(drop.data);
                 }
             }
         }

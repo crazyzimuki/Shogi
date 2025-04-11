@@ -117,7 +117,7 @@ public class ShogiGame : MonoBehaviour
         // --- Step 1: Identify the correct PIECE DATA ---
         // Use the reliable BoardDATA to find the data of the piece moving.
         // Assumes BoardDATA is correctly updated by CapturePiece!
-        PieceDATA pieceDataToMove = Instance.board.data.PieceAt(Instance.board.data, fromRow, fromCol); // Use BoardDATA.PieceAt
+        PieceDATA pieceDataToMove = Instance.board.data.PieceAt(fromRow, fromCol); // Use BoardDATA.PieceAt
 
         if (pieceDataToMove == null)
         {
@@ -137,7 +137,7 @@ public class ShogiGame : MonoBehaviour
             return;
         }
 
-        Instance.board.data.MovePiece(Instance.board.data, pieceDataToMove, toRow, toCol);
+        Instance.board.data.MovePiece(pieceDataToMove, toRow, toCol);
         pieceToMove.MovePieceTransform();          // Perform the visual move
 
         if (promote)
@@ -183,7 +183,7 @@ public class ShogiGame : MonoBehaviour
         highlight.boardRef = Instance.board;
         highlight.move.row = rowTarget;
         highlight.move.col = colTarget;
-        highlight.MakeAIDropMove(Instance.board, dropToUse);
+        highlight.MakeAIDropMove(dropToUse);
         Instance.board.data.droppedPiecesData.Remove(dropToUse);
         Destroy(highlight.gameObject);
     }

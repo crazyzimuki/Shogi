@@ -61,7 +61,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
             //ShogiGame.Instance.simulating = false;
             return true;
         }
-        simCopy.MovePiece(simCopy, pCopy, move.row, move.col);
+        simCopy.MovePiece(pCopy, move.row, move.col);
         //ShogiGame.Instance.simulating = false;
         return simCopy.isCheck(color, simCopy.Pieces);
     }
@@ -72,7 +72,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     public void MakeMove()
     {
         int rowBeforeMove = parentPiece.data.row;
-        boardRef.data.MovePiece(boardRef.data, parentPiece.data, move.row, move.col);
+        boardRef.data.MovePiece(parentPiece.data, move.row, move.col);
         parentPiece.MovePieceTransform();
         HighLightManager.ClearHighlights();
         parentPiece.data.CheckPromotion(rowBeforeMove);
@@ -85,7 +85,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     public void MakeDropMove()
     {
         DroppedPiece dp = boardRef.LastPieceClicked.GetComponent<DroppedPiece>();
-        boardRef.data.ModifyBoard(boardRef.data, move.row, move.col, dp.data.pieceType, dp.data.color);
+        boardRef.data.ModifyBoard(move.row, move.col, dp.data.pieceType, dp.data.color);
         boardRef.SpawnPieceType(dp.data.pieceType, move.row, move.col);
         boardRef.data.droppedPiecesData.Remove(dp.data); // Remove only once
         HighLightManager.ClearHighlights();
@@ -99,9 +99,9 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     /// <summary>
     /// Performs a drop move for the AI and updates the game state.
     /// </summary>
-    public void MakeAIDropMove(Board boardRef, DroppedPieceDATA drop)
+    public void MakeAIDropMove(DroppedPieceDATA drop)
     {
-        boardRef.data.ModifyBoard(boardRef.data, move.row, move.col, drop.pieceType, -1);
+        boardRef.data.ModifyBoard(move.row, move.col, drop.pieceType, -1);
         boardRef.SpawnPieceType(drop.pieceType, move.row, move.col);
         boardRef.data.droppedPiecesData.Remove(drop);
         if (drop.parent != null)

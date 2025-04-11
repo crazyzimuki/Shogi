@@ -50,7 +50,7 @@ public class DroppedPieceDATA
     {
         for (int j = 0; j < 5; j++)
         {
-            if (Mathf.Abs(boardRef.data.board[j, col]) == 1)
+            if (boardRef.data.board[j, col] == color)
                 return false;
         }
         return true;
@@ -59,7 +59,7 @@ public class DroppedPieceDATA
     public void MakeSimulatedDrop((int row, int col) move, Board b)
     {
         // Place the piece on the board
-        b.data.ModifyBoard(b.data, move.row, move.col, pieceType, color);
+        b.data.ModifyBoard(move.row, move.col, pieceType, color);
         // Create a new PieceDATA for the dropped piece with specific type
         PieceDATA newPiece = PieceDATA.CreatePieceByType(pieceType);
         newPiece.row = move.row;
