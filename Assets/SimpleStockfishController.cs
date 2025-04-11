@@ -80,7 +80,7 @@ public class SimpleStockfishController : MonoBehaviour
         }
 
         // --- Start Engine Initialization ---
-        UnityEngine.Debug.Log($"Engine path seems valid, attempting initialization: {enginePath}");
+        //UnityEngine.Debug.Log($"Engine path seems valid, attempting initialization: {enginePath}");
         StartCoroutine(InitializeEngineCoroutine());
     }
 
@@ -128,7 +128,7 @@ public class SimpleStockfishController : MonoBehaviour
 
     IEnumerator InitializeEngineCoroutine()
     {
-        UnityEngine.Debug.Log("Starting Engine Initialization...");
+        //UnityEngine.Debug.Log("Starting Engine Initialization...");
         isEngineInitialized = false;
         isEngineConfigured = false;
         startButton.interactable = false; // Ensure button is disabled during init
@@ -161,7 +161,7 @@ public class SimpleStockfishController : MonoBehaviour
                 engineProcess.BeginErrorReadLine(); // Start reading error stream async
                 engineWriter = engineProcess.StandardInput;
                 engineReader = engineProcess.StandardOutput;
-                UnityEngine.Debug.Log("Engine process started successfully.");
+                //UnityEngine.Debug.Log("Engine process started successfully.");
             }
             else
             {
@@ -194,7 +194,7 @@ public class SimpleStockfishController : MonoBehaviour
             CleanupEngineResources();
             yield break;
         }
-        UnityEngine.Debug.Log("USI handshake successful ('usiok' received).");
+        //UnityEngine.Debug.Log("USI handshake successful ('usiok' received).");
 
 
         // --- Set Shogi Variant ---
@@ -212,7 +212,7 @@ public class SimpleStockfishController : MonoBehaviour
 
         // --- Initialization Complete ---
         isEngineInitialized = true;
-        UnityEngine.Debug.Log("Engine Initialized and Ready! Enable 'Start Game' button.");
+        //UnityEngine.Debug.Log("Engine Initialized and Ready! Enable 'Start Game' button.");
         startButton.interactable = true; // Enable the button now
     }
 
@@ -221,11 +221,11 @@ public class SimpleStockfishController : MonoBehaviour
     {
         if (!isEngineInitialized)
         {
-            UnityEngine.Debug.LogError("Cannot configure difficulty: Engine not initialized.");
+            //UnityEngine.Debug.LogError("Cannot configure difficulty: Engine not initialized.");
             yield break;
         }
 
-        UnityEngine.Debug.Log("Sending difficulty configuration commands...");
+        //UnityEngine.Debug.Log("Sending difficulty configuration commands...");
 
         // Send commands - no need to wait for specific responses here unless debugging
         SendCommand($"setoption name Skill Level value {skillLevel}");
@@ -237,7 +237,7 @@ public class SimpleStockfishController : MonoBehaviour
         if (readyOkReceived)
         {
             isEngineConfigured = true;
-            UnityEngine.Debug.Log("Engine difficulty configured successfully and is ready.");
+            //UnityEngine.Debug.Log("Engine difficulty configured successfully and is ready.");
             needsUciNewGame = true; // Signal that the next move request should send ucinewgame
             UnityEngine.Debug.Log($"Engine difficulty configured (Skill Level {skillLevel}) and ready. Needs ucinewgame before next move.");
 

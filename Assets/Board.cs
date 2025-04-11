@@ -25,17 +25,17 @@ public class Board : MonoBehaviour
         LastPieceClicked = gameObject;
     }
 
-    public void SpawnPieceType(int piece, int row, int col)
+    public Piece SpawnPieceType(int piece, int row, int col)
     {
         switch (Mathf.Abs(piece))
         {
-            case 7: SpawnPiece(row, col, King); break;
-            case 5: SpawnPiece(row, col, Rook); break;
-            case 4: SpawnPiece(row, col, Bishop); break;
-            case 3: SpawnPiece(row, col, Gold); break;
-            case 2: SpawnPiece(row, col, Silver); break;
-            case 1: SpawnPiece(row, col, Pawn); break;
-            default: return;
+            case 7: return SpawnPiece(row, col, King);
+            case 5: return SpawnPiece(row, col, Rook);
+            case 4: return SpawnPiece(row, col, Bishop);
+            case 3: return SpawnPiece(row, col, Gold); 
+            case 2: return SpawnPiece(row, col, Silver); 
+            case 1: return SpawnPiece(row, col, Pawn); 
+            default: return null;
         }
     }
 
@@ -46,9 +46,9 @@ public class Board : MonoBehaviour
                 SpawnPieceType(data.board[i, j], i, j);
     }
 
-    public void SpawnPiece(int row, int col, GameObject piecePrefab)
+    public Piece SpawnPiece(int row, int col, GameObject piecePrefab)
     {
-        if (this == null) { ShogiGame.EndLife(-1); return; }
+        if (this == null) { ShogiGame.EndLife(-1); return null; }
         GameObject instance = Instantiate(piecePrefab, HighLightManager.Grid.GetWorldPosition(col, row), Quaternion.identity, transform);
         Piece comp = instance.GetComponent<Piece>();
 
@@ -69,6 +69,7 @@ public class Board : MonoBehaviour
         instance.transform.position += new Vector3(0.022f, comp.data.color * 0.09f, 0f);
         if (comp.data.color < 0)
             instance.transform.position += new Vector3(0f, -0.47f, 0f);
+        return comp;
     }
 
     public void CreateNewDrop(PieceDATA pieceDATA)
@@ -166,3 +167,6 @@ public class Board : MonoBehaviour
         return copy;
     }
 }
+
+
+//// ONE BIG BUG REMAINING: DROPS A DIFFERENT PIECE THAN ONE I CLICKED. REDO THAT PART. REDO DROPS UI TOO IT SOMETIMES HAS OVERLAPPING PIECES.

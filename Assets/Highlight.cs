@@ -74,9 +74,9 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         int rowBeforeMove = parentPiece.data.row;
         boardRef.data.MovePiece(parentPiece.data, move.row, move.col);
         parentPiece.MovePieceTransform();
-        HighLightManager.ClearHighlights();
         parentPiece.data.CheckPromotion(rowBeforeMove);
-        CheckForGameEnd(parentPiece.data.color);
+        HighLightManager.ClearHighlights();
+        ShogiGame.EndTurn();
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         Destroy(boardRef.LastPieceClicked.gameObject);
         if (p != null)
             boardRef.LastPieceClicked = p.gameObject;
-        CheckForGameEnd(dp.data.color);
+        ShogiGame.EndTurn();
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         boardRef.data.droppedPiecesData.Remove(drop);
         if (drop.parent != null)
             Destroy(drop.parent.gameObject);
-        CheckForGameEnd(-1); // AI plays as black (-1)
+        ShogiGame.EndTurn();
     }
 
     /// <summary>
@@ -115,10 +115,8 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
     /// </summary>
     private void CheckForGameEnd(int playerColor)
     {
-        int opponentColor = -playerColor;
-
         // First, check for game end condition (checkmate)
-        if (boardRef.data.IsCheckMate(boardRef, opponentColor))
+        if (boardRef.data.IsCheckMate(boardRef, -playerColor))
         {
             // If checkmate, end the game.
             ShogiGame.EndLife(playerColor);

@@ -183,9 +183,12 @@ public class BoardDATA
     {
         //Debug.Log($"Checking checkmate for color {color}, Pieces count: {Pieces.Count}");
         //Debug.Log($"Piece: {p.pieceType} at ({p.row},{p.col}), color {p.color}");
+        if (!isCheck(color, Pieces))
+            return false;
 
         List<PieceDATA> relevant = AllPiecesOfColor(color, Pieces);
         List<DroppedPieceDATA> relevantDrops = AllDroppedPiecesDataOfColor(-color);
+        Piece newPiss = null;
         foreach (PieceDATA p in relevant)
         {
             List<(int r, int c)> moves = p.GetLegalMoves();
@@ -197,6 +200,7 @@ public class BoardDATA
                 simCopy.MovePiece(pCopy, move.r, move.c);
                 if (!isCheck(color, simCopy.Pieces))
                 {
+                    Debug.Log($"THE MOVE {p.pieceType * p.color} TO ({move.Item1}, {move.Item2}) ESCAPES CHECK!");
                     return false;
                 }
             }
@@ -211,30 +215,31 @@ public class BoardDATA
             {
                 // Copy the board and pieces
                 Board simCopy = boardRef.CopyBoard();
-                Highlight high = new Highlight();
-                high.boardRef = simCopy;
-                high.move.row = move.row; high.move.col = move.col;
                 // Simulate the drop
-                SimulateAIDropMove(simCopy.data, dp, move.row, move.col);
+                newPiss = SimulateAIDropMove(simCopy.data, dp, move.row, move.col);
                 // Are we still in check after the drop?
                 if (!isCheck(color, simCopy.data.Pieces))
                 {
+                    GameObject.Destroy(newPiss);
                     return false;
                 }
+                if (newPiss != null)
+                    GameObject.Destroy(newPiss);
             }
-        }
+        }            
         Debug.Log("No escape found - Checkmate");
-        HighLightManager.ClearHighlights();
         return true;
     }
 
-    public void SimulateAIDropMove(BoardDATA bb, DroppedPieceDATA drop, int row, int col)
+    public Piece SimulateAIDropMove(BoardDATA bb, DroppedPieceDATA drop, int row, int col)
     {
         bb.ModifyBoard(row, col, drop.pieceType, drop.color);
-        //bb.boardRef.SpawnPieceType(drop.pieceType, row, col);
-        PieceDATA newPiece = bb.boardRef.CreatePieceDataByType(drop.pieceType);
+        Piece newPiss = bb.boardRef.SpawnPieceType(drop.pieceType, row, col);
+        /*PieceDATA newPiece = bb.boardRef.CreatePieceDataByType(drop.pieceType);
         newPiece.row = row; newPiece.col = col; newPiece.color = drop.color; newPiece.boardRef = bb.boardRef; newPiece.pieceType = drop.pieceType;
         Pieces.Add(newPiece);
+        return newPiece;*/
+        return newPiss;
     }
 
     public bool isCheck(int color, List<PieceDATA> pieces)

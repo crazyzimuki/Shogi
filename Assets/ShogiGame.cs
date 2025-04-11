@@ -41,13 +41,17 @@ public class ShogiGame : MonoBehaviour
     #region Turn Management
     public static  void EndTurn()
     {
+        if (Instance.board.data.IsCheckMate(Instance.board, -Instance.color))
+            EndLife(Instance.color);
         UnityEngine.Debug.Log($"EndTurn: Color={Instance.color}, Turn={Instance.turn}");
         HighLightManager.ClearHighlights();
 
         if (Instance.color == 0 || Instance.gameOver) return; // Game is over
-
-        Instance.color *= -1; // Switch player
-        Instance.turn++;
+        if (!Piece.isPromotionUIActive)
+        {
+            Instance.color *= -1; // Switch player
+            Instance.turn++;
+        }
 
         if (Instance.color == 1)
         {
@@ -212,6 +216,7 @@ public class ShogiGame : MonoBehaviour
         Instance.color = 0; // Halt game
         ActivatePieces(0);
         Instance.gameOver = true;
+        HighLightManager.ClearHighlights();
     }
 
     public static void ActivatePieces(int activeColor)
