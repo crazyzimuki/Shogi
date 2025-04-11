@@ -46,9 +46,6 @@ public class BoardDATA
             int targetColor = (target > 0) ? 1 : -1;
             if (targetColor != color)
             {
-                if (ShogiGame.Instance.simulating)
-                    SimulatedCapture(row, col);
-                else
                 CapturePiece(target, row, col, color);
             }
             else
@@ -90,20 +87,6 @@ public class BoardDATA
         boardRef.CreateNewDrop(targetPiece.pieceRef); 
         Pieces.Remove(targetPiece);
         Board.DestroyPiece(targetPiece.pieceRef.gameObject); 
-    }
-
-    public void SimulatedCapture(int row, int col)
-    {
-        PieceDATA targetPiece = PieceAt(row, col);
-        if (targetPiece != null)
-        {
-            targetPiece.simulatedCapture = true;
-            Pieces.Remove(targetPiece);
-            // Add to opponent's dropped pieces
-            DroppedPieceDATA newDrop = new DroppedPieceDATA { pieceType = targetPiece.pieceType, color = -targetPiece.color, promoted = false };
-            droppedPiecesData.Add(newDrop);
-        }
-        board[row, col] = 0;
     }
 
     public List<(int, int)> AllLegalMoves(int color)

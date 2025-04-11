@@ -98,16 +98,18 @@ public class Board : MonoBehaviour
                 data.droppedPiecesData.Remove(obj);
         }
 
-        ReorganizeDrops(drop);
+        ReorganizeDrops(dropObj);
     }
 
-    public void ReorganizeDrops(DroppedPiece drop)
+    public void ReorganizeDrops(GameObject dropObj)
     {
+        DroppedPiece drop = dropObj.GetComponent<DroppedPiece>();
+
         int positionIndex = 0;
         foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(ShogiGame.Instance.color))
         {
-            drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
-            drop.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            dropObj.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
+            dropObj.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
             SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
             rend.flipY = (dpr.color < 0); // Flip if black
             drop.ResetCollider();
