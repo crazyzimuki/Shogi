@@ -89,6 +89,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         Destroy(boardRef.LastPieceClicked.gameObject);
         if (p != null)
             boardRef.LastPieceClicked = p.gameObject;
+        boardRef.ReorganizeDrops();
         ShogiGame.EndTurn();
     }
 
@@ -102,6 +103,7 @@ public class Highlight : MonoBehaviour, IPointerClickHandler
         boardRef.data.droppedPiecesData.Remove(drop);
         if (drop.parent != null)
             Destroy(drop.parent.gameObject);
+        boardRef.ReorganizeDrops();
         ShogiGame.EndTurn();
     }
 
