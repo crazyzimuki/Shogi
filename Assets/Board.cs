@@ -4,7 +4,9 @@ using System.Linq;
 
 public class Board : MonoBehaviour
 {
-    public BoardDATA data = new BoardDATA();
+    public string gameType;
+    public static string shogiType;
+    public BoardDATA data = new BoardDATA(true, Board.shogiType);
     public List<Piece> Pieces = new List<Piece>();
     public GameObject LastPieceClicked;
 
@@ -17,9 +19,12 @@ public class Board : MonoBehaviour
     public GameObject Gold;
     public GameObject Silver;
     public GameObject Pawn;
+    public GameObject Horse;
+    public GameObject Lance;
 
     private void Awake()
     {
+        shogiType = gameType;
         data.InitializeBoard();
         data.boardRef = this;
         LastPieceClicked = gameObject;
@@ -35,15 +40,26 @@ public class Board : MonoBehaviour
             case 3: return SpawnPiece(row, col, Gold);
             case 2: return SpawnPiece(row, col, Silver);
             case 1: return SpawnPiece(row, col, Pawn);
+            case 8: return SpawnPiece(row, col, Horse);
+            case 9: return SpawnPiece(row, col, Lance);
             default: return null;
         }
     }
 
     public void PrintBoard()
     {
-        for (int i = 0; i < 5; i++)
-            for (int j = 0; j < 5; j++)
-                SpawnPieceType(data.board[i, j], i, j);
+        if (ShogiGame.Instance.shogiType == "mini")
+        {
+            for (int i = 0; i < 5; i++)
+                for (int j = 0; j < 5; j++)
+                    SpawnPieceType(data.board[i, j], i, j);
+        }
+        else
+        {
+            for (int i = 0; i < 9; i++)
+                for (int j = 0; j < 9; j++)
+                    SpawnPieceType(data.board[i, j], i, j);
+        }
     }
 
     public Piece SpawnPiece(int row, int col, GameObject piecePrefab)
@@ -66,9 +82,19 @@ public class Board : MonoBehaviour
         Pieces.Add(comp);
         data.Pieces.Add(comp.data);
 
+        if (ShogiGame.Instance.shogiType != "mini")
+        {
+            comp.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+        }
         instance.transform.position += new Vector3(0.022f, comp.data.color * 0.09f, 0f);
+
         if (comp.data.color < 0)
+        {
+            if (ShogiGame.Instance.shogiType == "mini")
             instance.transform.position += new Vector3(0f, -0.47f, 0f);
+            else
+            instance.transform.localPosition += new Vector3(0f, -0.75f, 0f);
+        }
         return comp;
     }
 
@@ -101,7 +127,8 @@ public class Board : MonoBehaviour
         ReorganizeDrops(dropObj);
     }
 
-    public void ReorganizeDrops(GameObject dropObj)
+    // IMPROVE THIS METHOD. STACK PIECES OF SAME TYPE? LIMIT HORIZONTAL LENGTH?
+    public void ReorganizeDrops(GameObject dropObj) 
     {
         DroppedPiece drop = dropObj.GetComponent<DroppedPiece>();
 
@@ -109,7 +136,10 @@ public class Board : MonoBehaviour
         foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(ShogiGame.Instance.color))
         {
             dropObj.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
+            if (shogiType == "mini")
             dropObj.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            else
+            dropObj.transform.localScale = new Vector3(0.125f, 0.125f, 1f);
             SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
             rend.flipY = (dpr.color < 0); // Flip if black
             drop.ResetCollider();
@@ -160,6 +190,8 @@ public class Board : MonoBehaviour
     {
         switch (pieceType)
         {
+            case 9: return new Lance();
+            case 8: return new Horse();
             case 7: return new King();
             case 5: return new Rook();
             case 4: return new Bishop();
@@ -194,6 +226,3 @@ public class Board : MonoBehaviour
         return copy;
     }
 }
-
-
-//// ONE BIG BUG REMAINING: DROPS A DIFFERENT PIECE THAN ONE I CLICKED. REDO THAT PART. REDO DROPS UI TOO IT SOMETIMES HAS OVERLAPPING PIECES.

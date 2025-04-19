@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6510502815750986918}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.056, y: 0.056, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6845855554375557778
 SpriteRenderer:
@@ -50,6 +50,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -97,14 +100,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3307e0db927b4b4e94154bfe7b06163, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DropsUI: {fileID: 0}
-  DroppablePiece: {fileID: 6476089784873492387, guid: 85480900a8255bc419e19e2602491bc1, type: 3}
-  DroppedPieces: []
+  gameType: mini
   Pieces: []
   LastPieceClicked: {fileID: 0}
+  DropsUI: {fileID: 0}
+  DroppablePiece: {fileID: 6476089784873492387, guid: 85480900a8255bc419e19e2602491bc1, type: 3}
   King: {fileID: 2505312301740918600, guid: aff9a89656ba5c342957316ec5f25155, type: 3}
   Rook: {fileID: 2505312301740918600, guid: 57d39d3b4e8bf184382fc0c1157f7358, type: 3}
   Bishop: {fileID: 2505312301740918600, guid: 376e5cd8cbda51e4f91dfc5cde211ca6, type: 3}
   Gold: {fileID: 2505312301740918600, guid: a4d99f042b784574289f679b513ca35a, type: 3}
   Silver: {fileID: 2505312301740918600, guid: e911d666940cc1e449485bb78c1a88bf, type: 3}
   Pawn: {fileID: 2505312301740918600, guid: 09baaa6552a1b0b4ea2b3ab21b1c1eb6, type: 3}
+  Horse: {fileID: 2505312301740918600, guid: 6647863f93a951a449a158c27d96ab18, type: 3}
+  Lance: {fileID: 2505312301740918600, guid: cba878f301a7232499a0195a3703383a, type: 3}

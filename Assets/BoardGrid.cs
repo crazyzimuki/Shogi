@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Class that converts board coordinates to world positions
-public class BoardGrid
+public class BoardGrid : MonoBehaviour
 {
-    public int gridSize = 5; // 5x5 grid
-    public float cellSize = 0.425f; // Adjust this to control the size of the grid cells
-    public Vector3 Offset = Vector3.zero;
+    public int gridSize;
+    public float cellSize;
+    public Vector3 Offset;
 
+    public void InitializeGrid(int amount, float size, Vector3 Offset)
+    {
+        gridSize = amount;
+        cellSize = size;
+        this.Offset = Offset;
+    }
 
     // Method to convert 2D array coordinates to world position
     public Vector3 GetWorldPosition(int x, int y)

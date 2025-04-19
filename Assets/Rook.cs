@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class Rook : PieceDATA
 {
+    private int bounds;
+
     public override List<(int, int)> GetLegalMoves()
     {
+        if (Board.shogiType == "mini")
+            bounds = 5;
+        else bounds = 9;
+
         if (promoted)
             return DragonKingMove();
         else return RookMove();
@@ -31,13 +37,13 @@ public class Rook : PieceDATA
             newRow = row;
             newCol = col;
 
-            while (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) // Keep going until out of bounds
+            while (newRow >= 0 && newRow < bounds && newCol >= 0 && newCol < bounds) // Keep going until out of bounds
             {
                 // Go in direction
                 newRow += moveOffsets[i, 0];
                 newCol += moveOffsets[i, 1];
 
-                if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) // If still in bounds
+                if (newRow >= 0 && newRow < bounds && newCol >= 0 && newCol < bounds) // If still in bounds
                 {
                     bool isCapture = ((color > 0 && BoardArray[newRow, newCol] < 0) || (color < 0 && BoardArray[newRow, newCol] > 0) && BoardArray[newRow, newCol] != 0);
                     //Debug.Log($"ENEMY PIECE AT Row ==  {newRow} Col == {newCol} IS THE PIECE: + {boardRef.board[newRow, newCol]}");
@@ -82,7 +88,7 @@ public class Rook : PieceDATA
             int newCol = col + moveOffsets[i, 1];
 
             // Check if the new position is within the board bounds
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < bounds && newCol >= 0 && newCol < bounds)
             {
                 int targetPiece = BoardArray[newRow, newCol];
 

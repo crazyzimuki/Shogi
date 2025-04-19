@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DroppedPieceDATA
 {
+    private int bounds;
     public GameObject parent;
     public Board boardRef;
     public int pieceType;
@@ -12,30 +13,50 @@ public class DroppedPieceDATA
 
     public List<(int, int)> GenerateMoves()
     {
+        if (Board.shogiType == "mini")
+            bounds = 5;
+        else bounds = 9;
+
         List<(int row, int col)> AllMoves = new List<(int row, int col)>();
         (int row, int col) move;
 
         if (boardRef == null)
             return AllMoves;
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < bounds; i++)
         {
-            for (int k = 0; k < 5; k++)
+            for (int k = 0; k < bounds; k++)
             {
-                if (boardRef.data.board[i, k] == 0)
+                if (boardRef.data.board[i, k] == 0) // empty square to drop to
                 {
-                    if (pieceType == 1)
+                    if (pieceType == 1) // drop is a pawn
                     {
-                        if ((color == 1 && i != 0) || (color == -1 && i != 4))
+                        if ((color == 1 && i != 0) || (color == -1 && i != bounds-1)) // Not last rank (illegal drop)
                         {
-                            if (CheckCol(k))
+                            if (CheckCol(k)) // Check that column is free of your own pawns
                             {
                                 move = (i, k);
                                 AllMoves.Add(move);
                             }
                         }
                     }
-                    else
+                    else if (pieceType == 8) // Horse
+                    {
+                        if ((color == 1 && i > 1) || (color == -1 && i < 7)) // Not last two ranks (illegal drop)
+                        {
+                            move = (i, k);
+                            AllMoves.Add(move);
+                        }
+                    }
+                    else if (pieceType == 9) // Lance
+                    {
+                        if ((color == 1 && i != 0) || (color == -1 && i != bounds - 1)) // Not last rank (illegal drop)                        {
+                        {
+                            move = (i, k);
+                            AllMoves.Add(move);
+                        }
+                    }
+                    else // No further restrictions on drops
                     {
                         move = (i, k);
                         AllMoves.Add(move);
@@ -48,11 +69,16 @@ public class DroppedPieceDATA
 
     public bool CheckCol(int col)
     {
-        for (int j = 0; j < 5; j++)
+        for (int j = 0; j < bounds; j++)
         {
-            if (boardRef.data.board[j, col] == color)
-                return false;
+            if (boardRef.PieceAt(j, col) != null)
+            {
+                var PieceAtCol = boardRef.PieceAt(j, col).data;
+                if (PieceAtCol.color == color && PieceAtCol.pieceType == 1 && PieceAtCol.promoted == false) // If we find specifically an unpromoted friendly pawn
+                    return false;
+            }
         }
+
         return true;
     }
 

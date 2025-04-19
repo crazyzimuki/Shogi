@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class King : PieceDATA
 {
+    int bounds;
     public King()
     {
+        if (Board.shogiType == "mini")
+            bounds = 5;
+        else bounds = 9;
+
         if (color < 0) pieceRef.FlipVertically();
         return; // No UI bullshit since can't promote
     }
@@ -34,7 +39,7 @@ public class King : PieceDATA
             int newCol = col + moveOffsets[i, 1];
 
             // Check if the new position is within the board bounds
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < bounds && newCol >= 0 && newCol < bounds)
             {
                 int targetPiece = BoardArray[newRow, newCol];
 

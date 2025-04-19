@@ -5,9 +5,10 @@ using System;
 
 public class BoardDATA
 {
+    public string shogiType;
     public Board boardRef;
     public int[,] board;
-    public int[,] initialBoardSetup = new int[5, 5] {
+    public int[,] initialBoardSetupMini = new int[5, 5] {
         { -5, -4, -2, -3, -7 },
         {  0,  0,  0,  0, -1 },
         {  0,  0,  0,  0,  0 },
@@ -15,25 +16,41 @@ public class BoardDATA
         {  7,  3,  2,  4,  5 }
     };
 
+    public int[,] initialBoardSetupFull = new int[9, 9] {
+        { -9, -8, -2, -3, -7, -3, -2, -8, -9 },
+        {  0,  -5,  0,  0, 0, 0, 0, -4, 0 },
+        {  -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+        {  0,  0,  0,  0,  0, 0, 0, 0, 0 },
+        {  0,  0,  0,  0,  0, 0, 0, 0, 0 },
+        {  0,  0,  0,  0,  0, 0, 0, 0, 0 },
+        {  1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        {  0,  4,  0,  0,  0, 0, 0, 5, 0 },
+        {  9, 8, 2, 3, 7, 3, 2, 8, 9 }
+    };
+
     public List<PieceDATA> Pieces = new List<PieceDATA>();
     public List<DroppedPieceDATA> droppedPiecesData = new List<DroppedPieceDATA>();
-    public BoardDATA()
-    {
-        board = new int[5, 5];
-        for (int i = 0; i < 5; i++)
-            for (int j = 0; j < 5; j++)
-                board[i, j] = initialBoardSetup[i, j];
-    }
 
     public void InitializeBoard()
     {
         boardRef = GameObject.Find("Board").GetComponent<Board>();
-        for (int r = 0; r < 5; r++)
-            for (int c = 0; c < 5; c++)
-                board[r, c] = initialBoardSetup[r, c];
+        if (Board.shogiType == "mini")
+        {
+            board = new int[5, 5];
+            for (int i = 0; i < 5; i++)
+                for (int j = 0; j < 5; j++)
+                    board[i, j] = initialBoardSetupMini[i, j];
+        }
+        else
+        {
+            board = new int[9, 9];
+            for (int i = 0; i < 9; i++)
+                for (int j = 0; j < 9; j++)
+                    board[i, j] = initialBoardSetupFull[i, j];
+        }
     }
 
-    public PieceDATA PieceAt(int row, int col)
+        public PieceDATA PieceAt(int row, int col)
     {
         return Pieces.FirstOrDefault(p => p.row == row && p.col == col);
     }
@@ -112,20 +129,36 @@ public class BoardDATA
 
     public void PrintBoardToConsole()
     {
-        Debug.Log("--- Board State ---");
-        for (int i = 0; i < 5; i++)
+        if (Board.shogiType == "mini")
         {
-            string line = "";
-            for (int j = 0; j < 5; j++)
-                line += board[i, j].ToString().PadLeft(3) + ", ";
-            Debug.Log(line);
+            Debug.Log("--- Board State ---");
+            for (int i = 0; i < 5; i++)
+            {
+                string line = "";
+                for (int j = 0; j < 5; j++)
+                    line += board[i, j].ToString().PadLeft(3) + ", ";
+                Debug.Log(line);
+            }
+            Debug.Log("--- End Board State ---");
         }
-        Debug.Log("--- End Board State ---");
+        else
+        {
+            Debug.Log("--- Board State ---");
+            for (int i = 0; i < 9; i++)
+            {
+                string line = "";
+                for (int j = 0; j < 9; j++)
+                    line += board[i, j].ToString().PadLeft(3) + ", ";
+                Debug.Log(line);
+            }
+            Debug.Log("--- End Board State ---");
+
+        }
     }
 
     public BoardDATA Clone()
     {
-        BoardDATA copy = new BoardDATA(false);
+        BoardDATA copy = new BoardDATA(false, shogiType);
         copy.board = (int[,])this.board.Clone();
         copy.Pieces = new List<PieceDATA>();
         foreach (PieceDATA p in this.Pieces)
@@ -144,14 +177,25 @@ public class BoardDATA
         return copy;
     }
 
-    public BoardDATA(bool initialize)
+    public BoardDATA(bool initialize, string shogiType)
     {
-        board = new int[5, 5];
+        this.shogiType = shogiType;
         if (initialize)
         {
-            for (int i = 0; i < 5; i++)
-                for (int j = 0; j < 5; j++)
-                    board[i, j] = initialBoardSetup[i, j];
+            if (shogiType == "mini")
+            {
+                board = new int[5, 5];
+                for (int i = 0; i < 5; i++)
+                    for (int j = 0; j < 5; j++)
+                        board[i, j] = initialBoardSetupMini[i, j];
+            }
+            else
+            {
+                board = new int[9, 9];
+                for (int i = 0; i < 9; i++)
+                    for (int j = 0; j < 9; j++)
+                        board[i, j] = initialBoardSetupFull[i, j];
+            }
         }
     }
 
@@ -224,8 +268,18 @@ public class BoardDATA
         foreach (PieceDATA p in opponent)
         {
             var moves = p.GetLegalMoves();
+            if (moves == null)
+            {
+                Debug.Log("Legal moves returned null!");
+                return false;
+            }
             //Debug.Log($"Opponent {p.pieceType} at ({p.row},{p.col}) moves: {string.Join(", ", moves)}");
-            if (moves.Any(m => m.Item1 == kingRow && m.Item2 == kingCol)) return true;
+            //if (moves.Any(m => m.Item1 == kingRow && m.Item2 == kingCol)) return true;
+            foreach (var move in moves)
+            {
+                if (move.Item1 == kingRow && move.Item2 == kingCol)
+                    return true;
+            }
         }
         return false;
     }
@@ -244,36 +298,75 @@ public class BoardDATA
     public string SFEN()
     {
         string s = string.Empty;
-
-        // For each rank on the board
-        for (int i = 0; i < 5; i++)
+        if (Board.shogiType == "mini")
         {
-            if (i != 0) s += '/';
-            int emptyCounter = 0; // Count empty squares in a row
-            bool lastEmpty = false; // Was last square empty?
-
-            // For each file in the rank
-            for (int j = 0; j < 5; j++)
+            // For each rank on the board
+            for (int i = 0; i < 5; i++)
             {
-                // Convert numbers to SFEN letters
-                switch (board[i, j])
+                if (i != 0) s += '/';
+                int emptyCounter = 0; // Count empty squares in a row
+                bool lastEmpty = false; // Was last square empty?
+
+                // For each file in the rank
+                for (int j = 0; j < 5; j++)
                 {
-                    case -7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'k'; break;
-                    case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'r'; break;
-                    case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'b'; break;
-                    case -3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'g'; break;
-                    case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 's'; break;
-                    case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'p'; break;
-                    case 7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'K'; break;
-                    case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'R'; break;
-                    case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'B'; break;
-                    case 3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'G'; break;
-                    case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'S'; break;
-                    case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'P';  break;
-                    case 0: emptyCounter++; lastEmpty = true; break;
+                    // Convert numbers to SFEN letters
+                    switch (board[i, j])
+                    {
+                        case -7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'k'; break;
+                        case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'r'; break;
+                        case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'b'; break;
+                        case -3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'g'; break;
+                        case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 's'; break;
+                        case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'p'; break;
+                        case 7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'K'; break;
+                        case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'R'; break;
+                        case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'B'; break;
+                        case 3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'G'; break;
+                        case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'S'; break;
+                        case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'P'; break;
+                        case 0: emptyCounter++; lastEmpty = true; break;
+                    }
                 }
+                if (emptyCounter > 0) s += emptyCounter;
             }
-            if (emptyCounter > 0) s += emptyCounter;
+        }
+        else
+        {
+            // For each rank on the board
+            for (int i = 0; i < 9; i++)
+            {
+                if (i != 0) s += '/';
+                int emptyCounter = 0; // Count empty squares in a row
+                bool lastEmpty = false; // Was last square empty?
+
+                // For each file in the rank
+                for (int j = 0; j < 9; j++)
+                {
+                    // Convert numbers to SFEN letters
+                    switch (board[i, j])
+                    {
+                        case -9: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'l'; break;
+                        case -8: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'n'; break;
+                        case -7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'k'; break;
+                        case -5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'r'; break;
+                        case -4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'b'; break;
+                        case -3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'g'; break;
+                        case -2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 's'; break;
+                        case -1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'p'; break;
+                        case 7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'K'; break;
+                        case 5: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'R'; break;
+                        case 4: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'B'; break;
+                        case 3: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'G'; break;
+                        case 2: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'S'; break;
+                        case 1: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'P'; break;
+                        case 8: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'N'; break;
+                        case 9: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'L'; break;
+                        case 0: emptyCounter++; lastEmpty = true; break;
+                    }
+                }
+                if (emptyCounter > 0) s += emptyCounter;
+            }
         }
 
         s += ' ';
@@ -294,6 +387,10 @@ public class BoardDATA
         int blackSilverCounter = 0;
         int whitePawnCounter = 0;
         int blackPawnCounter = 0;
+        int whiteHorseCounter = 0;
+        int blackHorseCounter = 0;
+        int whiteLanceCounter = 0;
+        int blackLanceCounter = 0;
 
         // Check if there are any drops
         if (droppedPiecesData.Count == 0)
@@ -305,6 +402,8 @@ public class BoardDATA
             if (drop.color == -1) continue; // Skip black pieces
             switch (drop.pieceType)
             {
+                case 9: whiteLanceCounter++; if (whiteKingCounter > 1) s += whiteLanceCounter; s += 'L'; break;
+                case 8: whiteHorseCounter++; if (whiteKingCounter > 1) s += whiteHorseCounter; s += 'N'; break;
                 case 7: whiteKingCounter++; if (whiteKingCounter > 1) s += whiteKingCounter; s += 'K'; break;
                 case 5: whiteRookCounter++; if (whiteRookCounter > 1) s += whiteRookCounter; s += 'R'; break;
                 case 4: whiteBishopCounter++; if (whiteBishopCounter > 1) s += whiteBishopCounter; s += 'B'; break;
@@ -320,6 +419,8 @@ public class BoardDATA
             if (drop.color == 1) continue; // Skip white pieces
             switch (drop.pieceType)
             {
+                case 9: blackLanceCounter++; if (whiteKingCounter > 1) s += blackLanceCounter; s += 'l'; break;
+                case 8: blackHorseCounter++; if (whiteKingCounter > 1) s += blackHorseCounter; s += 'n'; break;
                 case 7: blackKingCounter++; if (blackKingCounter > 1) s += blackKingCounter; s += 'k'; break;
                 case 5: blackRookCounter++; if (blackRookCounter > 1) s += blackRookCounter; s += 'r'; break;
                 case 4: blackBishopCounter++; if (blackBishopCounter > 1) s += blackBishopCounter; s += 'b'; break;
@@ -349,6 +450,10 @@ public class BoardDATA
             toCol = (int)Char.GetNumericValue(USI[2])-1;
             switch (USI[3])
             {
+                case 'i': toRow = 8; break;
+                case 'h': toRow = 7; break;
+                case 'g': toRow = 6; break;
+                case 'f': toRow = 5; break;
                 case 'e': toRow = 4; break;
                 case 'd': toRow = 3; break;
                 case 'c': toRow = 2; break;
@@ -364,15 +469,23 @@ public class BoardDATA
             fromCol = 5- (int)Char.GetNumericValue(USI[0]);
             switch (USI[1])
             {
-                case 'e': fromRow = 4; break;
-                case 'd': fromRow = 3; break;
-                case 'c': fromRow = 2; break;
-                case 'b': fromRow = 1; break;
-                case 'a': fromRow = 0; break;
+                case 'i': toRow = 8; break;
+                case 'h': toRow = 7; break;
+                case 'g': toRow = 6; break;
+                case 'f': toRow = 5; break;
+                case 'e': toRow = 4; break;
+                case 'd': toRow = 3; break;
+                case 'c': toRow = 2; break;
+                case 'b': toRow = 1; break;
+                case 'a': toRow = 0; break;
             }
             toCol = 5- (int)Char.GetNumericValue(USI[2]);
             switch (USI[3])
             {
+                case 'i': toRow = 8; break;
+                case 'h': toRow = 7; break;
+                case 'g': toRow = 6; break;
+                case 'f': toRow = 5; break;
                 case 'e': toRow = 4; break;
                 case 'd': toRow = 3; break;
                 case 'c': toRow = 2; break;
@@ -392,6 +505,8 @@ public class BoardDATA
             case 'g': case 'G': return 3;
             case 'b': case 'B': return 4;
             case 'r': case 'R': return 5;
+            case 'l': case 'L': return 9;
+            case 'n': case 'N': return 8;
         }
         return 0;
     }

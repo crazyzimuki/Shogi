@@ -9,6 +9,8 @@ using System.Collections;
 
 public class ShogiGame : MonoBehaviour
 {
+    int bounds;
+    public string shogiType;
     public bool simulating = false;
     public bool gameOver = false;
     public Highlight highPREFAB;  // Prefab for move highlights
@@ -33,6 +35,15 @@ public class ShogiGame : MonoBehaviour
         // Initial setup
         turn = 1;
         color = 1; // White starts
+        if (shogiType == "mini")
+            bounds = 5;
+        else
+            bounds = 9;
+
+        if (bounds == 5)
+        HighLightManager.Grid.InitializeGrid(5, 0.425f, Vector3.zero);
+        else
+            HighLightManager.Grid.InitializeGrid(9, 0.26f, new Vector3(-0.29f, 0.08f, 0f));
         board.PrintBoard(); // Spawn pieces
         ActivatePieces(color);
     }
@@ -196,6 +207,8 @@ public class ShogiGame : MonoBehaviour
     {
         switch (char.ToLower(pieceChar))
         {
+            case 'l': return 9; // Lance
+            case 'n': return 8; // Horse
             case 'p': return 1; // Pawn
             case 's': return 2; // Silver
             case 'g': return 3; // Gold
@@ -232,7 +245,7 @@ public class ShogiGame : MonoBehaviour
     private static int FileToCol(char file)
     {
         int fileNum = int.Parse(file.ToString());
-        return 5 - fileNum; // File 5 → Col 0, File 1 → Col 4
+        return Instance.bounds - fileNum; // File 5 → Col 0, File 1 → Col 4
     }
 
     private static int RankToRow(char rank)
@@ -244,6 +257,10 @@ public class ShogiGame : MonoBehaviour
             case 'c': return 2;
             case 'd': return 3;
             case 'e': return 4;
+            case 'f': return 5;
+            case 'g': return 6;
+            case 'h': return 7;
+            case 'i': return 8;
             default: throw new Exception($"Invalid rank: {rank}");
         }
     }

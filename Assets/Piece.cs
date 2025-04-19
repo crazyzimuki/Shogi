@@ -147,15 +147,33 @@ public class Piece : MonoBehaviour, IPointerClickHandler
         if (transform == null)
             return;
         transform.position = HighLightManager.Grid.GetWorldPosition(data.col, data.row);
+
         transform.position += new Vector3(0.022f, data.color * 0.09f, 0f);
-        if (data.color < 0) transform.position += new Vector3(0f, -0.47f, 0f);
+
+        if (data.color < 0)
+        {
+            if (ShogiGame.Instance.shogiType == "mini")
+                transform.position += new Vector3(0f, -0.47f, 0f);
+            else
+                transform.localPosition += new Vector3(0f, -0.75f, 0f);
+        }
     }
 
     public void CheckPromotionRank()
     {
-        if ((data.color == 1 && data.row == 0) || (data.color == -1 && data.row == 4))
-            data.isPromotionRank = true;
-        else
-            data.isPromotionRank = false;
+        if (Board.shogiType == "mini")
+        {
+            if ((data.color == 1 && data.row == 0) || (data.color == -1 && data.row == 4))
+                data.isPromotionRank = true;
+            else
+                data.isPromotionRank = false;
+        }
+        else // Regular shogi
+        {
+            if ((data.color == 1 && data.row < 3) || (data.color == -1 && data.row > 5))
+                data.isPromotionRank = true;
+            else
+                data.isPromotionRank = false;
+        }
     }
 }

@@ -198,7 +198,10 @@ public class SimpleStockfishController : MonoBehaviour
 
 
         // --- Set Shogi Variant ---
+        if (ShogiGame.Instance.shogiType == "mini")
         SendCommand("setoption name UCI_Variant value minishogi");
+        else
+            SendCommand("setoption name UCI_Variant value shogi");
 
         // --- Check Readiness ---
         bool readyOkReceived = false;

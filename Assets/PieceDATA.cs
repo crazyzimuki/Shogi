@@ -36,14 +36,27 @@ public abstract class PieceDATA
         pieceRef.CheckPromotionRank();
         if (!promoted)
         {
-            // player moving into promotion rank
-            if ((color == 1 && row == 0) || (color == -1 && row == 4))
-                pieceRef.UIPromotion();
+            if (Board.shogiType == "mini")
+            {
+                // player moving into promotion rank
+                if ((color == 1 && row == 0) || (color == -1 && row == 4))
+                    pieceRef.UIPromotion();
 
-            // player moving out of promotion rank
-            // DOESNT WORK
-            if ((color == 1 && rowBeforeMove == 0 && row != 0) || (color == -1 && rowBeforeMove == 4 && row != 4))
-                pieceRef.UIPromotion();
+                // player moving out of promotion rank
+                if ((color == 1 && rowBeforeMove == 0 && row != 0) || (color == -1 && rowBeforeMove == 4 && row != 4))
+                    pieceRef.UIPromotion();
+            }
+            else // Regular shogi
+            {               
+                // player moving into promotion area
+                if ((color == 1 && row < 3) || (color == -1 && row > 5))
+                    pieceRef.UIPromotion();
+
+                // player moving out of promotion area
+                if ((color == 1 && rowBeforeMove < 3 && row > 2) || (color == -1 && rowBeforeMove > 5 && row < 6))
+                    pieceRef.UIPromotion();
+
+            }
         }
     }
 
@@ -79,6 +92,8 @@ public abstract class PieceDATA
     {
         switch (pieceType)
         {
+            case 9: return new Lance();
+            case 8: return new Horse();
             case 7: return new King();
             case 5: return new Rook();
             case 4: return new Bishop();
