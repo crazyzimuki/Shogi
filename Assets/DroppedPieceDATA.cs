@@ -33,7 +33,7 @@ public class DroppedPieceDATA
                     {
                         if ((color == 1 && i != 0) || (color == -1 && i != bounds-1)) // Not last rank (illegal drop)
                         {
-                            if (CheckCol(k)) // Check that column is free of your own pawns
+                            if (CheckCol(k)) // Check that column is free of our own pawns
                             {
                                 move = (i, k);
                                 AllMoves.Add(move);

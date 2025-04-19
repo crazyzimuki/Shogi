@@ -37,7 +37,7 @@ public class HighLightManager : MonoBehaviour
                 {
                     highlightSCRIPT.isDrop = true;
                     if (ShogiGame.Instance.shogiType != "mini")
-                    highlight.transform.localScale = new Vector3(.3f, .3f, 1f);
+                    highlight.transform.localScale = new Vector3(.35f, .35f, 1f);
                 }
                 else
                 {

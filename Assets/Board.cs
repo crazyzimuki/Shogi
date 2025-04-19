@@ -123,36 +123,45 @@ public class Board : MonoBehaviour
             if (obj == null)
                 data.droppedPiecesData.Remove(obj);
         }
-
-        ReorganizeDrops(dropObj);
     }
 
-    // IMPROVE THIS METHOD. STACK PIECES OF SAME TYPE? LIMIT HORIZONTAL LENGTH?
-    public void ReorganizeDrops(GameObject dropObj) 
+    // IMPROVE THIS METHOD. STACK PIECES OF SAME TYPE!
+    public void ReorganizeDrops() 
     {
-        DroppedPiece drop = dropObj.GetComponent<DroppedPiece>();
-
         int positionIndex = 0;
-        foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(ShogiGame.Instance.color))
+        foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(1))
         {
-            dropObj.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
-            if (shogiType == "mini")
-            dropObj.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            GameObject drop = dpr.parent;
+            DroppedPiece droop = drop.GetComponent<DroppedPiece>();
+            if (positionIndex < 6)
+            drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.3f, -1.1f, 0f);
             else
-            dropObj.transform.localScale = new Vector3(0.125f, 0.125f, 1f);
+            {
+                drop.transform.localPosition = new Vector3(2.227f + (positionIndex % 6) * 0.3f, -1.1f + (-0.4f * (positionIndex/6)), 0f);
+            }
+
+            drop.transform.localScale = new Vector3(0.2f, 0.2f, 1f);
             SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
             rend.flipY = (dpr.color < 0); // Flip if black
-            drop.ResetCollider();
+            droop.ResetCollider();
             positionIndex++;
         }
         positionIndex = 0;
-        foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(-ShogiGame.Instance.color))
+        foreach (DroppedPieceDATA dpr in data.AllDroppedPiecesDataOfColor(-1))
         {
-            drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
-            drop.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            GameObject drop = dpr.parent;
+            DroppedPiece droop = drop.GetComponent<DroppedPiece>();
+            if (positionIndex < 6)
+                drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.3f, -1.1f, 0f);
+            else
+            {
+                drop.transform.localPosition = new Vector3(2.227f + (positionIndex % 6) * 0.3f, -1.1f + (0.4f * (positionIndex / 6)), 0f);
+            }
+
+            drop.transform.localScale = new Vector3(0.2f, 0.2f, 1f);
             SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
             rend.flipY = (dpr.color < 0); // Flip if black
-            drop.ResetCollider();
+            droop.ResetCollider();
             positionIndex++;
         }
     }
@@ -178,12 +187,7 @@ public class Board : MonoBehaviour
         drop.Init(this, dropData.pieceType, dropData.color, pieceToCapture.DefaultSPR, false);
 
         // Position based on existing drops of this color
-        int positionIndex = data.AllDroppedPiecesDataOfColor(dropData.color).Count - 1; // -1 because we just added it
-        drop.transform.localPosition = new Vector3(2.227f + positionIndex * 0.4f, -1.651f, 0f);
-        drop.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
-        SpriteRenderer rend = drop.GetComponent<SpriteRenderer>();
-        rend.flipY = (dropData.color < 0); // Flip if black
-        drop.ResetCollider();
+        ReorganizeDrops();
     }
 
     public PieceDATA CreatePieceDataByType(int pieceType)
