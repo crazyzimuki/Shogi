@@ -3,6 +3,7 @@ using UnityEngine;
 
 public abstract class PieceDATA
 {
+    public int gamebounds;
     public Board boardRef;           // Live board reference
     public BoardDATA simulationBoardData;  // Simulation board pointer
     //public bool simulatedCapture;

@@ -11,17 +11,7 @@ public class Horse : PieceDATA
         else bounds = 9;
 
         if (!promoted)
-        {
-
-            if ((color == 1 && row < 2) || (color == -1 && row > 6)) // Last two ranks
-            {
-                // BUG: DOUBLE ENEMY MOVE ON FORCED PROMOTION
-                pieceRef.Promote(); // Force promotion
-                return null;
-            }
-            else
-                return HorseMove();
-        }
+            return HorseMove();
         else
             return GoldGeneralMove();
     }

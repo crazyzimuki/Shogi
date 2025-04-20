@@ -12,17 +12,7 @@ public class Lance : PieceDATA
         else bounds = 9;
 
         if (!promoted)
-        {
-            if ((color == 1 && row == 0) || (color == -1 && row == bounds-1)) // Last rank
-            {
-                // BUG: DOUBLE ENEMY MOVE ON FORCED PROMOTION
-                pieceRef.Promote(); // Force promotion
-                return null;
-            }
-            else
-                return LanceMove();
-        }
-
+            return LanceMove();
         else
             return GoldGeneralMove();
     }

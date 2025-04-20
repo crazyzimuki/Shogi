@@ -76,9 +76,29 @@ public class Piece : MonoBehaviour, IPointerClickHandler
 
     public virtual void UIPromotion()
     {
+        if (Board.shogiType == "mini")
+            data.gamebounds = 5;
+        else data.gamebounds = 9;
+
+        //// Forced promotions
         if (data.boardRef == null || data.color == -1)
         {
             Promote();
+            ShogiGame.EndTurn();
+            return;
+        }
+
+        if ((data.pieceType == 1 || data.pieceType == 9) && ((data.color == 1 && data.row == 0) || (data.color == -1 && data.row == data.gamebounds - 1))) // Pawn or Lance on last rank
+        {
+            Promote();
+            ShogiGame.EndTurn();
+            return;
+        }
+
+        if (data.pieceType == 8 && ((data.color == 1 && data.row < 2) || (data.color == -1 && data.row > 6))) // Horse on last two ranks
+        {
+            Promote();
+            ShogiGame.EndTurn();
             return;
         }
 
