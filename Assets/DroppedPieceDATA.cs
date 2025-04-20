@@ -73,7 +73,7 @@ public class DroppedPieceDATA
         {
             if (boardRef.PieceAt(j, col) != null)
             {
-                var PieceAtCol = boardRef.PieceAt(j, col).data;
+                PieceDATA PieceAtCol = boardRef.PieceAt(j, col).data;
                 if (PieceAtCol.color == color && PieceAtCol.pieceType == 1 && PieceAtCol.promoted == false) // If we find specifically an unpromoted friendly pawn
                     return false;
             }

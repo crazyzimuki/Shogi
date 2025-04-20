@@ -11,9 +11,18 @@ public class Pawn : PieceDATA
         else bounds = 9;
 
         if (!promoted)
-            return PawnMove();
+        {
+            if ((color == 1 && row == 0) || (color == -1 && row == bounds - 1)) // Last rank
+            {
+                // BUG: DOUBLE ENEMY MOVE ON FORCED PROMOTION
+                pieceRef.Promote(); // Force promotion
+                return null;
+            }
+            else
+                return PawnMove();
+        }
         else
-           return GoldGeneralMove();
+            return GoldGeneralMove();
     }
 
     public List<(int, int)> PawnMove()

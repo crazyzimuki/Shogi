@@ -15,6 +15,7 @@ public class Lance : PieceDATA
         {
             if ((color == 1 && row == 0) || (color == -1 && row == bounds-1)) // Last rank
             {
+                // BUG: DOUBLE ENEMY MOVE ON FORCED PROMOTION
                 pieceRef.Promote(); // Force promotion
                 return null;
             }

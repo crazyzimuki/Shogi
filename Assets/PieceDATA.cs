@@ -5,7 +5,7 @@ public abstract class PieceDATA
 {
     public Board boardRef;           // Live board reference
     public BoardDATA simulationBoardData;  // Simulation board pointer
-    public bool simulatedCapture;
+    //public bool simulatedCapture;
     public Piece pieceRef;
     public static int nextPieceId = 0;
     public bool isClickable;
@@ -77,7 +77,7 @@ public abstract class PieceDATA
             copy.color = color;
             copy.pieceType = pieceType;
             copy.promoted = promoted;
-            copy.simulatedCapture = simulatedCapture;
+            //copy.simulatedCapture = simulatedCapture;
             copy.boardRef = b;
         }
         return copy;

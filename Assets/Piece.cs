@@ -61,8 +61,6 @@ public class Piece : MonoBehaviour, IPointerClickHandler
 
     public virtual void DontPromote()
     {
-        if (data.pieceType == 1) // Pawn must promote
-            return;
         data.promoted = false;
         if (isPromotionUIActive)
         {
@@ -104,11 +102,6 @@ public class Piece : MonoBehaviour, IPointerClickHandler
         PromotionUI.transform.GetChild(0).transform.localPosition = new Vector3(0.0299999993f, 0.111000001f, 0f);
         PromotionUI.transform.GetChild(1).transform.localPosition = new Vector3(0.493000001f, -0.331999987f, 0f);
         PromotionUI.transform.GetChild(2).transform.localPosition = new Vector3(0.493000001f, 0.111000001f, 0f);
-
-        if (data.pieceType == 1)
-        {
-            PromotionUI.transform.GetChild(1).gameObject.SetActive(false);
-        }
 
         BoxCollider2D[] colliders = PromotionUI.GetComponentsInChildren<BoxCollider2D>();
         foreach (BoxCollider2D col in colliders)

@@ -12,10 +12,10 @@ public class Horse : PieceDATA
 
         if (!promoted)
         {
-            //Debug.Log($"HorseMove().Count == {HorseMove().Count}");
-            //Debug.Log($"isPromotionRank == {isPromotionRank}");
-            if (HorseMove().Count == 0 && isPromotionRank) // No legal moves + in promotion zone
+
+            if ((color == 1 && row < 2) || (color == -1 && row > 6)) // Last two ranks
             {
+                // BUG: DOUBLE ENEMY MOVE ON FORCED PROMOTION
                 pieceRef.Promote(); // Force promotion
                 return null;
             }
