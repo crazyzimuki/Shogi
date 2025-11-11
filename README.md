@@ -20,7 +20,7 @@ Features include:
 
 ### Windows (MiniShogi & Full Shogi)
 1. Download the Release folder.
-2. Run Mini-Shinobi-Beta.exe to play MiniShogi or open the folder "Shinobi-Full" and run the file Shinobi.exe to play full-size Shogi!
+2. Run Mini-Shinobi.exe to play MiniShogi or open the folder "Shinobi-Full" and run the file Shinobi.exe to play full-size Shogi.
 
 ---
 
