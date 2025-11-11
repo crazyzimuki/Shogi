@@ -9,10 +9,16 @@ public class Lance : PieceDATA
     {
         if (Board.shogiType == "mini")
             bounds = 5;
+        else if (Board.shogiType == "chu")
+            bounds = 12;
         else bounds = 9;
 
         if (!promoted)
             return LanceMove();
+        else if (bounds == 12) // Promoted lance in chu-shogi
+        {
+            return HorseMove();
+        }
         else
             return GoldGeneralMove();
     }
@@ -22,21 +28,21 @@ public class Lance : PieceDATA
         List<(int, int)> moves = new List<(int, int)>();
         (int row, int col) move;
 
-       // Debug.Log($"LanceMove: Starting for piece at ({row}, {col}), color: {color}, board bounds: {bounds}");
+        // Debug.Log($"LanceMove: Starting for piece at ({row}, {col}), color: {color}, board bounds: {bounds}");
 
         // White pieces forward direction is --
         if (color == 1)
         {
-           // Debug.Log("LanceMove: Processing White piece (upward movement)");
-            for (int i = row-1; i > -1; i--) // Look forward
+            // Debug.Log("LanceMove: Processing White piece (upward movement)");
+            for (int i = row - 1; i > -1; i--) // Look forward
             {
-               // Debug.Log($"LanceMove: Checking position ({i}, {col})");
+                // Debug.Log($"LanceMove: Checking position ({i}, {col})");
                 // Empty square
                 if (BoardArray[i, col] == 0)
                 {
                     move.row = i; move.col = col;
                     moves.Add(move);
-                   // Debug.Log($"LanceMove: Added empty square move to ({i}, {col})");
+                    // Debug.Log($"LanceMove: Added empty square move to ({i}, {col})");
                 }
                 // Capture
                 else if ((color > 0 && BoardArray[i, col] < 0) || (color < 0 && BoardArray[i, col] > 0) && BoardArray[i, col] != 0)
@@ -58,7 +64,7 @@ public class Lance : PieceDATA
         else
         {
             //Debug.Log("LanceMove: Processing Black piece (downward movement)");
-            for (int i = row+1; i < bounds; i++) // Look forward
+            for (int i = row + 1; i < bounds; i++) // Look forward
             {
                 //Debug.Log($"LanceMove: Checking position ({i}, {col})");
                 // Empty square
@@ -73,7 +79,7 @@ public class Lance : PieceDATA
                 {
                     move.row = i; move.col = col;
                     moves.Add(move);
-                   // Debug.Log($"LanceMove: Added capture move to ({i}, {col}), enemy piece: {BoardArray[i, col]}");
+                    // Debug.Log($"LanceMove: Added capture move to ({i}, {col}), enemy piece: {BoardArray[i, col]}");
                     break; // Enemy piece ends line of sight
                 }
                 // Friendly piece
@@ -114,6 +120,58 @@ public class Lance : PieceDATA
                 {
                     moves.Add((newRow, newCol));
                     // Debug.Log("Row == " + newRow + " Col == " + newCol + " Added to list");
+                }
+            }
+        }
+        return moves;
+    }
+
+    public List<(int, int)> HorseMove()
+    {
+        List<(int, int)> moves = new List<(int, int)>();
+
+        int newRow = row;
+        int newCol = col;
+
+        // Define infinite range move directions for a Horse (relative to its position)
+        int[,] moveOffsets = new int[,]
+        {
+        { -1, -1 }, { -1, 0 }, { -1, 1 }, // Forward moves 
+        { 1, 0 }  // Backward moves
+        };
+
+        for (int i = 0; i < 4; i++) // For each movement direction
+        {
+            // Reset values
+            newRow = row;
+            newCol = col;
+
+            while (newRow >= 0 && newRow < bounds && newCol >= 0 && newCol < bounds) // Keep going until out of bounds
+            {
+                // Go in direction
+                newRow += moveOffsets[i, 0];
+                newCol += moveOffsets[i, 1];
+
+                if (newRow >= 0 && newRow < bounds && newCol >= 0 && newCol < bounds) // If still in bounds
+                {
+                    bool isCapture = ((color > 0 && BoardArray[newRow, newCol] < 0) || (color < 0 && BoardArray[newRow, newCol] > 0) && BoardArray[newRow, newCol] != 0);
+                    //Debug.Log($"ENEMY PIECE AT Row ==  {newRow} Col == {newCol} IS THE PIECE: + {boardRef.board[newRow, newCol]}");
+
+                    if (isCapture) // If enemy piece spotted: Line of sight broken 
+                    {
+                        //Debug.Log($"THE HORSE MOVE: Row == " + newRow + " Col == " + newCol + " CAPTURES AN ENEMY PIECE. ADDED TO LIST!");
+                        moves.Add((newRow, newCol));
+                        break;
+                    }
+
+                    else if ((color > 0 && BoardArray[newRow, newCol] > 0) || (color < 0 && BoardArray[newRow, newCol] < 0)) // If friendly piece spotted: Line of sight broken AND move is illegal
+                    {
+                        //Debug.Log($"THE HORSE MOVE: Row == " + newRow + " Col == " + newCol + " CAPTURES FRIENDLY PIECE. REJECTED!");
+                        break;
+                    }
+
+                    else moves.Add((newRow, newCol));
+                    //Debug.Log($"THE HORSE MOVE: Row == " + newRow + " Col == " + newCol + " ADDED TO LIST!");
                 }
             }
         }

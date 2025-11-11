@@ -54,6 +54,14 @@ public class Board : MonoBehaviour
                 for (int j = 0; j < 5; j++)
                     SpawnPieceType(data.board[i, j], i, j);
         }
+
+        else if (ShogiGame.Instance.shogiType == "chu")
+        {
+            for (int i = 0; i < 12; i++)
+                for (int j = 0; j < 12; j++)
+                    SpawnPieceType(data.board[i, j], i, j);
+        }
+
         else
         {
             for (int i = 0; i < 9; i++)
@@ -100,7 +108,7 @@ public class Board : MonoBehaviour
 
     public void CreateNewDrop(PieceDATA pieceDATA)
     {
-        if (pieceDATA == null)
+        if (pieceDATA == null || shogiType == "chu") // No drops in chu-shogi
             return;
 
         DroppedPieceDATA dropData = new DroppedPieceDATA();
@@ -168,7 +176,7 @@ public class Board : MonoBehaviour
 
     public void CreateNewDrop(Piece pieceToCapture)
     {
-        if (pieceToCapture == null)
+        if (pieceToCapture == null || shogiType == "chu") // No drops in chu-shogi
             return;
 
         DroppedPieceDATA dropData = new DroppedPieceDATA();
@@ -194,13 +202,26 @@ public class Board : MonoBehaviour
     {
         switch (pieceType)
         {
+            case 13: return new Chariot();
+            case 14: return new Tiger();
+            case 15: return new Phoenix(false);
+            case 16: return new Kirin(false);
+            case 17: return new Copper(true); // Crab
+            case 18: return new Silver(true); // Snake
+            case 19: return new Bishop(true); // Dragonhorse
+            case 20: return new Rook(true); // Dragonking
+            case 21: return new Phoenix(true); // Queen
+            case 22: return new Kirin(true); // Lion
+            case 23: return new DoublePawn();
+            case 11: return new Copper(false);
+            case 10: return new Leopard();
             case 9: return new Lance();
             case 8: return new Horse();
             case 7: return new King();
-            case 5: return new Rook();
-            case 4: return new Bishop();
+            case 5: return new Rook(false);
+            case 4: return new Bishop(false);
             case 3: return new Gold();
-            case 2: return new Silver();
+            case 2: return new Silver(false);
             case 1: return new Pawn();
             default: return null;
         }

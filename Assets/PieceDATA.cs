@@ -17,6 +17,8 @@ public abstract class PieceDATA
     public int pieceType;
     public int pieceId;
     public bool promoted;
+    public bool doublepromoted; // Only for pieces that can double promote (chu-shogi)
+    public bool triplepromoted; // Only for pieces that can triple promote (chu-shogi)
     public int[,] BoardArray
     {
         get
@@ -45,6 +47,16 @@ public abstract class PieceDATA
 
                 // player moving out of promotion rank
                 if ((color == 1 && rowBeforeMove == 0 && row != 0) || (color == -1 && rowBeforeMove == 4 && row != 4))
+                    pieceRef.UIPromotion();
+            }
+            else if (Board.shogiType == "chu") // Chu-shogi
+            {
+                // player moving into promotion area
+                if ((color == 1 && row < 4) || (color == -1 && row > 7))
+                    pieceRef.UIPromotion();
+
+                // player moving out of promotion area
+                if ((color == 1 && rowBeforeMove < 4 && row > 3) || (color == -1 && rowBeforeMove > 6 && row < 7))
                     pieceRef.UIPromotion();
             }
             else // Regular shogi

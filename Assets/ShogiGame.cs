@@ -37,11 +37,15 @@ public class ShogiGame : MonoBehaviour
         color = 1; // White starts
         if (shogiType == "mini")
             bounds = 5;
+        else if (shogiType == "chu")
+            bounds = 12;
         else
             bounds = 9;
 
         if (bounds == 5)
         HighLightManager.Grid.InitializeGrid(5, 0.425f, Vector3.zero);
+        else if (bounds == 12)
+            HighLightManager.Grid.InitializeGrid(12, 0.26f, new Vector3(-0.29f, 0.08f, 0f));
         else
             HighLightManager.Grid.InitializeGrid(9, 0.26f, new Vector3(-0.29f, 0.08f, 0f));
         board.PrintBoard(); // Spawn pieces
@@ -261,6 +265,9 @@ public class ShogiGame : MonoBehaviour
             case 'g': return 6;
             case 'h': return 7;
             case 'i': return 8;
+            case 'j': return 9;
+            case 'k': return 10;
+            case 'l': return 11;
             default: throw new Exception($"Invalid rank: {rank}");
         }
     }

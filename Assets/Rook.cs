@@ -6,10 +6,17 @@ public class Rook : PieceDATA
 {
     private int bounds;
 
+    public Rook(bool promoted)
+    {
+        if (promoted) pieceRef.Promote();
+    }
+
     public override List<(int, int)> GetLegalMoves()
     {
         if (Board.shogiType == "mini")
             bounds = 5;
+        else if (Board.shogiType == "chu")
+            bounds = 12;
         else bounds = 9;
 
         if (promoted)

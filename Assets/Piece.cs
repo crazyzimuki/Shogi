@@ -44,7 +44,13 @@ public class Piece : MonoBehaviour, IPointerClickHandler
 
     public virtual void Promote()
     {
+        if (data.doublepromoted)
+            data.triplepromoted = true;
+        else if (data.promoted)
+            data.doublepromoted = true;
+        else
         data.promoted = true;
+
         spr.sprite = promotedSPR;
         Debug.Log("PIECE PROMOTED!");
         if (isPromotionUIActive)
@@ -61,7 +67,7 @@ public class Piece : MonoBehaviour, IPointerClickHandler
 
     public virtual void DontPromote()
     {
-        data.promoted = false;
+        //data.promoted = false;
         if (isPromotionUIActive)
         {
             PromotionUI.SetActive(false);
@@ -78,6 +84,8 @@ public class Piece : MonoBehaviour, IPointerClickHandler
     {
         if (Board.shogiType == "mini")
             data.gamebounds = 5;
+        else if (Board.shogiType == "chu")
+            data.gamebounds = 12;
         else data.gamebounds = 9;
 
         //// Forced promotions
@@ -88,18 +96,25 @@ public class Piece : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        if ((data.pieceType == 1 || data.pieceType == 9) && ((data.color == 1 && data.row == 0) || (data.color == -1 && data.row == data.gamebounds - 1))) // Pawn or Lance on last rank
+        if (Board.shogiType != "chu")
         {
-            Promote();
-            ShogiGame.EndTurn();
-            return;
-        }
+            if ((data.pieceType == 1 || data.pieceType == 9) && ((data.color == 1 && data.row == 0) || (data.color == -1 && data.row == data.gamebounds - 1))) // Pawn or Lance on last rank
+            {
+                Promote();
+                ShogiGame.EndTurn();
+                return;
+            }
 
-        if (data.pieceType == 8 && ((data.color == 1 && data.row < 2) || (data.color == -1 && data.row > 6))) // Horse on last two ranks
+            if (data.pieceType == 8 && ((data.color == 1 && data.row < 2) || (data.color == -1 && data.row > 6))) // Horse on last two ranks
+            {
+                Promote();
+                ShogiGame.EndTurn();
+                return;
+            }
+        }
+        else // Chu-shogi forced promotions
         {
-            Promote();
-            ShogiGame.EndTurn();
-            return;
+
         }
 
         Vector3 SpawnPositionForBlack = new Vector3(-3f * .211f, 3f * .425f, 0f);

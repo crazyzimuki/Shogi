@@ -8,6 +8,8 @@ public class Horse : PieceDATA
     {
         if (Board.shogiType == "mini")
             bounds = 5;
+        else if (Board.shogiType == "chu")
+            bounds = 12;
         else bounds = 9;
 
         if (!promoted)

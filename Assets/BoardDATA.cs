@@ -28,6 +28,21 @@ public class BoardDATA
         {  9, 8, 2, 3, 7, 3, 2, 8, 9 }
     };
 
+    public int[,] initialBoardSetupBig = new int[12, 12] {
+        {9, 10, 11, 2, 3, 12, 7, 3, 2, 11, 10, 9},
+        {13, 0, 4, 0, 14, 15, 16, 14, 0, 4, 0, 13},
+        {17, 18, 5, 19, 20, 21, 22, 20, 19, 5, 18, 17},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {0, 0, 0, 23, 0, 0, 0, 0, 23, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 23, 0, 0, 0, 0, 23, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {17, 18, 5, 19, 20, 21, 22, 20, 19, 5, 18, 17},
+        {13, 0, 4, 0, 14, 15, 16, 14, 0, 4, 0, 13},
+        {9, 10, 11, 2, 3, 12, 7, 3, 2, 11, 10, 9}
+    };
+
     public List<PieceDATA> Pieces = new List<PieceDATA>();
     public List<DroppedPieceDATA> droppedPiecesData = new List<DroppedPieceDATA>();
 
@@ -41,6 +56,15 @@ public class BoardDATA
                 for (int j = 0; j < 5; j++)
                     board[i, j] = initialBoardSetupMini[i, j];
         }
+
+        else if (Board.shogiType == "chu")
+        {
+            board = new int[12, 12];
+            for (int i = 0; i < 12; i++)
+                for (int j = 0; j < 12; j++)
+                    board[i, j] = initialBoardSetupBig[i, j];
+        }
+
         else
         {
             board = new int[9, 9];
@@ -346,6 +370,7 @@ public class BoardDATA
                     // Convert numbers to SFEN letters
                     switch (board[i, j])
                     {
+                        // ADD CHU PIECES
                         case -9: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'l'; break;
                         case -8: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } if (PieceAt(i, j).promoted) s += '+'; s += 'n'; break;
                         case -7: if (lastEmpty) { s += emptyCounter; emptyCounter = 0; lastEmpty = false; } s += 'k'; break;
@@ -391,6 +416,7 @@ public class BoardDATA
         int blackHorseCounter = 0;
         int whiteLanceCounter = 0;
         int blackLanceCounter = 0;
+        // ADD CHU PIECES
 
         // Check if there are any drops
         if (droppedPiecesData.Count == 0)
@@ -402,6 +428,7 @@ public class BoardDATA
             if (drop.color == -1) continue; // Skip black pieces
             switch (drop.pieceType)
             {
+                // ADD CHU PIECES
                 case 9: whiteLanceCounter++; if (whiteKingCounter > 1) s += whiteLanceCounter; s += 'L'; break;
                 case 8: whiteHorseCounter++; if (whiteKingCounter > 1) s += whiteHorseCounter; s += 'N'; break;
                 case 7: whiteKingCounter++; if (whiteKingCounter > 1) s += whiteKingCounter; s += 'K'; break;
@@ -450,6 +477,9 @@ public class BoardDATA
             toCol = (int)Char.GetNumericValue(USI[2])-1;
             switch (USI[3])
             {
+                case 'l': toRow = 11; break;
+                case 'k': toRow = 10; break;
+                case 'j': toRow = 9; break;
                 case 'i': toRow = 8; break;
                 case 'h': toRow = 7; break;
                 case 'g': toRow = 6; break;
@@ -469,6 +499,9 @@ public class BoardDATA
             fromCol = 5- (int)Char.GetNumericValue(USI[0]);
             switch (USI[1])
             {
+                case 'l': toRow = 11; break;
+                case 'k': toRow = 10; break;
+                case 'j': toRow = 9; break;
                 case 'i': toRow = 8; break;
                 case 'h': toRow = 7; break;
                 case 'g': toRow = 6; break;
@@ -482,6 +515,9 @@ public class BoardDATA
             toCol = 5- (int)Char.GetNumericValue(USI[2]);
             switch (USI[3])
             {
+                case 'l': toRow = 11; break;
+                case 'k': toRow = 10; break;
+                case 'j': toRow = 9; break;
                 case 'i': toRow = 8; break;
                 case 'h': toRow = 7; break;
                 case 'g': toRow = 6; break;
@@ -505,8 +541,21 @@ public class BoardDATA
             case 'g': case 'G': return 3;
             case 'b': case 'B': return 4;
             case 'r': case 'R': return 5;
-            case 'l': case 'L': return 9;
-            case 'n': case 'N': return 8;
+            case 'l': case 'L': return 9; // Lance
+            case 'n': case 'N': if (shogiType == "chu") return 22; else return 8; // Horse or lion depending on game type
+            case 'f': case 'F': return 10; // Leopard
+            case 'c': case 'C': return 11; // Copper
+            case 'e': case 'E': return 12; // Elephant
+            case 'a': case 'A': return 13; // Chariot
+            case 't': case 'T': return 14; // Tiger
+            case 'x': case 'X': return 15; // Phoenix
+            case 'o': case 'O': return 16; // Kirin
+            case 'm': case 'M': return 17; // Crab
+            case 'v': case 'V': return 18; // Snake
+            case 'd': case 'D': return 19; // Dragon-Horse
+            case 'h': case 'H': return 20; // Dragon-King
+            case 'q': case 'Q': return 21; // Queen
+            case 'i': case 'I': return 23; // Double-Pawn
         }
         return 0;
     }
